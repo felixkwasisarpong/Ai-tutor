@@ -11,9 +11,15 @@ class AskRequest(BaseModel):
 
 class AskResponse(BaseModel):
     answer: str
+    source: str
 
 
-@router.post("", response_model=AskResponse)
-def ask(payload: AskRequest) -> AskResponse:
+@router.post("/ask", response_model=AskResponse)
+def ask_question(payload: AskRequest) -> AskResponse:
     answer = f"You asked: {payload.question}"
-    return AskResponse(answer=answer)
+    return AskResponse(answer=f"You asked: {payload.question}", source="placeholder")
+
+
+@router.get("/health")
+def health_check() -> dict:
+    return {"status": "ok"}
