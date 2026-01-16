@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from app.llm.prompts import default_prompt
 from app.llm.client import OllamaClient
-
+from app.core.logging import logger
 
 
 router = APIRouter()
@@ -19,6 +19,7 @@ class AskResponse(BaseModel):
 
 @router.post("/ask", response_model=AskResponse)
 def ask_question(payload: AskRequest) -> AskResponse:
+    logger.info(f"Received question")   
     prompt = default_prompt(payload.question)
     answer = llm.generate(prompt)
 
