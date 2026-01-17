@@ -8,7 +8,8 @@ services:
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
     volumes:
-      - ./data:/app/data    
+      - ./data:/app/data  
+      - rag-store:/app/rag_store  
     depends_on:
       - ollama
 
@@ -19,6 +20,8 @@ services:
     volumes:
       - ollama-data:/root/.ollama
       
+      
 
 volumes:
   ollama-data:
+  rag-store:
