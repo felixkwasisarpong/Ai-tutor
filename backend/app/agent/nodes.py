@@ -5,6 +5,7 @@ from app.llm.client import OllamaClient
 import app.agent.state as state
 from app.agent.router import route_question
 from app.llm.generation import generate_answer_with_context
+from app.rag.citation import format_citations
 
 llm = OllamaClient()
 
@@ -37,7 +38,7 @@ def rag_node(state: state.AgentState):
     return {
         "answer": answer,
         "source": f"rag:{state.get('course_code')}",
-        "citations": citations,
+        "citations": format_citations(citations),
     }
 
 
