@@ -32,7 +32,8 @@ def make_chunks(
                 "department": department,
                 "course_code": course_code,
                 "document": document,
+                "chunk_index": i,
             },
         }
-        for chunk in chunks
+    for i, chunk in enumerate(chunks)
     ]

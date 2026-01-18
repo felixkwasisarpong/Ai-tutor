@@ -9,3 +9,4 @@ class AgentState(TypedDict):
     decision_reason: Optional[str]
     answer: Optional[str]
     source: Optional[str]
+    citations: Optional[list[dict]]

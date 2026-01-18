@@ -1,3 +1,4 @@
+from typing import List, Optional
 from fastapi import APIRouter
 from pydantic import BaseModel
 from app.models.ask import AskRequest
@@ -12,12 +13,21 @@ agent = build_agent()
 router = APIRouter()
 llm = OllamaClient()
 
+class Citation(BaseModel):
+    document: str
+    chunk: int
+    
 class AskRequest(BaseModel):
     question: str
     course_code: str | None = None
 class AskResponse(BaseModel):
     answer: str
     source: str
+    citations: Optional[List[Citation]] = None
+
+
+
+
 
 
 @router.post("/ask", response_model=AskResponse)
@@ -41,6 +51,7 @@ def ask_question(payload: AskRequest) -> AskResponse:
     return {
         "answer": result["answer"],
         "source": result["source"],
+        "citations": result.get("citations"),
     }
 
 

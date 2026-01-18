@@ -29,7 +29,7 @@ def rag_node(state: state.AgentState):
         course_code=state.get("course_code"),
     )
 
-    answer = generate_answer_with_context(
+    answer, citations = generate_answer_with_context(
         question=state["question"],
         context=results,
     )
@@ -37,6 +37,7 @@ def rag_node(state: state.AgentState):
     return {
         "answer": answer,
         "source": f"rag:{state.get('course_code')}",
+        "citations": citations,
     }
 
 
