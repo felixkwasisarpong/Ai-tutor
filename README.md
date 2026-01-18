@@ -1,7 +1,7 @@
 
 # 🎓 AI Tutor — Agentic RAG Learning Assistant
 
-![AI Tutor Banner](banner.png)
+![AI Tutor Banner](banner.jpg)
 
 > **An agentic, course-aware AI tutor for university-level sciences, combining Retrieval-Augmented Generation (RAG), LangGraph-based decision logic, and local LLM inference.**
 
