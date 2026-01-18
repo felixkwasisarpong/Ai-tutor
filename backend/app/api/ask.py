@@ -1,10 +1,13 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
+
 from app.llm.prompts import default_prompt
 from app.llm.client import OllamaClient
 from app.core.logging import logger
 from app.rag.retrieve import retrieve_context
+from app.agent.graph import build_agent
 
+agent = build_agent()
 router = APIRouter()
 llm = OllamaClient()
 
@@ -19,25 +22,16 @@ class AskResponse(BaseModel):
 
 @router.post("/ask", response_model=AskResponse)
 def ask_question(payload: AskRequest) -> AskResponse:
-    context = retrieve_context(payload.question)
-    prompt = f"""
-            You are a university-level science tutor.
-            Use the context below to answer accurately.
-
-            Context:
-            {context}
-
-            Question:
-            {payload.question}
-
-            Answer:
-            """.strip()
-
-    answer = llm.generate(prompt)
+    result = agent.invoke({
+        "question": payload.question,
+        "use_rag": False,
+        "context": None,
+        "answer": None
+    })  
 
     return AskResponse(
-        answer=answer,
-        source="rag+ollama"
+        answer=result["answer"],
+        source="agent+rag" if result["use_rag"] else "agent"
     )
 
 
