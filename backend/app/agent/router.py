@@ -28,9 +28,24 @@ Default behavior:
 User question:
 {question}
 """.strip()
+COURSE_HINT_KEYWORDS = [
+    "this course",
+    "our course",
+    "the course",
+    "lecture",
+    "slides",
+    "notes",
+    "in class",
+]
 
 
 def route_question(question: str) -> dict:
+    q = question.lower()
+    if any(k in q for k in COURSE_HINT_KEYWORDS):
+        return {
+            "use_rag": True,
+            "reason": "Explicit course reference detected",
+        }
     response = llm.generate(
         ROUTER_PROMPT.format(question=question)
     )
