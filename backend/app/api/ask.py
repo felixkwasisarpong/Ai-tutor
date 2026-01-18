@@ -15,8 +15,9 @@ llm = OllamaClient()
 
 class Citation(BaseModel):
     document: str
-    chunk: int
-    
+    chunk: int | None
+    ref: str
+
 class AskRequest(BaseModel):
     question: str
     course_code: str | None = None

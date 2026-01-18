@@ -5,7 +5,7 @@ from fastapi import File, Form
 from uuid import UUID
 import shutil
 from app.rag.store import vector_store
-from app.core.course_registry import get_course_by_code
+from app.core.course_registry import get_course_by_code, get_all_courses
 
 
 
@@ -17,6 +17,19 @@ UPLOAD_DIR = "data/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+@router.get("/courses")
+def list_courses():
+    courses = get_all_courses()
+
+    return [{
+        "id": str(course.id),
+        "code": course.code,
+        "name": course.name,
+        "department": course.department,
+    }
+    for course in courses
+
+    ]
 
 @router.post("/courses/{course_code}/documents")
 async def upload_course_document(
