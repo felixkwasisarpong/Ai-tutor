@@ -4,50 +4,61 @@ from app.rag.retrieve  import retrieve_context
 from app.llm.client import OllamaClient
 import app.agent.state as state
 from app.agent.router import route_question
-
+from app.llm.generation import generate_answer_with_context
 
 llm = OllamaClient()
 
-def decide_node(state: state.AgentState) -> state.AgentState:
+def decide_node(state: state.AgentState):
+    if state.get("force_rag"):
+        return {
+            "use_rag": True,
+            "decision_reason": "forced by course context",
+        }
+
     decision = route_question(state["question"])
-    course_hint = None
-    if "this course" in state["question"].lower():
-        course_hint = "University Sciences"
-    print(
-        f"AGENT ROUTER → use_rag={decision['use_rag']} | "
-        f"reason={decision['reason']}"
+    return {
+        "use_rag": decision["use_rag"],
+        "decision_reason": decision["reason"],
+    }
+
+def rag_node(state: state.AgentState):
+    results = retrieve_context(
+        state["question"],
+        course_code=state.get("course_code"),
+    )
+
+    answer = generate_answer_with_context(
+        question=state["question"],
+        context=results,
     )
 
     return {
-         **state, "use_rag": decision["use_rag"], 
-         "decision_reason": decision["reason"],
-         "course_hint": course_hint}
-
-
-def rag_node(state: state.AgentState) -> state.AgentState:
-    context = retrieve_context(
-        state["question"],
-        course=state.get("course_hint"),
-    )
-    return {**state, "context": context}
+        "answer": answer,
+        "source": f"rag:{state.get('course_code')}",
+    }
 
 
 def llm_node(state: state.AgentState) -> state.AgentState:
-        if state.get("context"):
-            prompt = f"""
-    You are a university science tutor.
-    Use the context below to answer accurately.
+    if state.get("context"):
+        prompt = f"""
+You are a university science tutor.
+Use the context below to answer accurately.
 
-    Context:
-    {state['context']}
+Context:
+{state['context']}
 
-    Question:
-    {state['question']}
+Question:
+{state['question']}
 
-    Answer:
-    """.strip()
-        else:
-            prompt = state["question"]
+Answer:
+""".strip()
+    else:
+        prompt = state["question"]
 
-        answer = llm.generate(prompt)
-        return {**state, "answer": answer}
+    answer = llm.generate(prompt)
+
+    return {
+        **state,
+        "answer": answer,
+        "source": "llm",
+    }

@@ -13,14 +13,15 @@ def build_agent():
     graph.set_entry_point("decide")
     graph.add_conditional_edges(
         "decide",
-        lambda state: "rag" if state["use_rag"] else "llm",
+        lambda state: "rag" if state.get("use_rag", False) else "llm",
     {
         "rag": "rag",
         "llm": "llm"
     },
     )
 
-    graph.add_edge("rag", "llm")    
-    graph.add_edge("llm", END)  # End node
+
+    graph.set_finish_point("rag")
+    graph.set_finish_point("llm")
 
     return graph.compile()
