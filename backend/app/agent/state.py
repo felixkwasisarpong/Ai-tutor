@@ -5,5 +5,7 @@ class AgentState(TypedDict):
     force_rag: bool
     course_code: Optional[str]
     course_id: Optional[str]
+    use_rag: Optional[bool]
+    decision_reason: Optional[str]
     answer: Optional[str]
     source: Optional[str]

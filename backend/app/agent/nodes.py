@@ -11,12 +11,14 @@ llm = OllamaClient()
 def decide_node(state: state.AgentState):
     if state.get("force_rag"):
         return {
+            **state,
             "use_rag": True,
             "decision_reason": "forced by course context",
         }
 
     decision = route_question(state["question"])
     return {
+        **state,
         "use_rag": decision["use_rag"],
         "decision_reason": decision["reason"],
     }

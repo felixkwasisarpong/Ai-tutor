@@ -42,7 +42,7 @@ class VectorStore:
     def add_documents(self, chunks):
         self.add(chunks, persist=True)
 
-    def search(self, query: str, k: int = 3):
+    def search(self, query: str, k: int = 3, filters: dict | None = None):
         if self.index.ntotal == 0:
             return []
 
@@ -61,7 +61,16 @@ class VectorStore:
                     }
                 )
 
-        return results
+        if not filters:
+            return results
+
+        filtered = []
+        for item in results:
+            metadata = item.get("metadata", {})
+            if all(metadata.get(key) == value for key, value in filters.items()):
+                filtered.append(item)
+
+        return filtered
     
     def _persist(self):
         print(f"Persisting FAISS index to {INDEX_PATH}")

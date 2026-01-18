@@ -5,4 +5,4 @@ from pydantic import BaseModel, Field
 
 class AskRequest(BaseModel):
     question: str = Field(..., example="What is the capital of France?")
-    course_code: str | None = None
+    course_code: Optional[str] = None
