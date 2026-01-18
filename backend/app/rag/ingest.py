@@ -17,3 +17,15 @@ def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]
         start = end - overlap
 
     return chunks
+
+def make_chunks(texts, *, course: str, document: str):
+    return [
+        {
+            "text": t,
+            "metadata": {
+                "course": course,
+                "document": document,
+            },
+        }
+        for t in texts
+    ]

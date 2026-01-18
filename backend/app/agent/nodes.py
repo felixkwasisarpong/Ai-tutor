@@ -10,7 +10,9 @@ llm = OllamaClient()
 
 def decide_node(state: state.AgentState) -> state.AgentState:
     decision = route_question(state["question"])
-
+    course_hint = None
+    if "this course" in state["question"].lower():
+        course_hint = "University Sciences"
     print(
         f"AGENT ROUTER → use_rag={decision['use_rag']} | "
         f"reason={decision['reason']}"
@@ -18,11 +20,15 @@ def decide_node(state: state.AgentState) -> state.AgentState:
 
     return {
          **state, "use_rag": decision["use_rag"], 
-         "decision_reason": decision["reason"]}
+         "decision_reason": decision["reason"],
+         "course_hint": course_hint}
 
 
 def rag_node(state: state.AgentState) -> state.AgentState:
-    context = retrieve_context(state["question"])
+    context = retrieve_context(
+        state["question"],
+        course=state.get("course_hint"),
+    )
     return {**state, "context": context}
 
 

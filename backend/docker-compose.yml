@@ -15,6 +15,7 @@ services:
 
   ollama:
     image: ollama/ollama:latest
+    command: ["serve"]   # 🔥 THIS IS THE FIX
     ports:
       - "11434:11434"
     volumes:

@@ -1,46 +1,63 @@
 from app.llm.client import OllamaClient
-
+import json
+import re
 llm = OllamaClient()
 
 ROUTER_PROMPT = """
-You are an AI router for a university tutor system.
+You are a routing function, not a chatbot.
 
-Decide whether the user's question requires consulting course documents
-(such as lecture notes, PDFs, slides, or a knowledgebase),
-or if it can be answered using general knowledge.
+Your job is to decide whether a user's question requires consulting
+course documents (lecture notes, PDFs, slides, knowledgebases).
 
-Rules:
-- Answer ONLY with JSON
-- Do NOT answer the question itself
-- Default to "false" unless document context is clearly useful
+Rules (MANDATORY):
+- Respond with VALID JSON only
+- Do not include markdown
+- Do not include explanations outside JSON
+- Do not include backticks
+- Do not include extra text
 
-Respond in this format:
+JSON schema (MUST MATCH EXACTLY):
 {{
   "use_rag": true | false,
-  "reason": "<short explanation>"
+  "reason": "short explanation"
 }}
 
-Question:
+Default behavior:
+- If unsure, set "use_rag" to false
+
+User question:
 {question}
 """.strip()
 
 
 def route_question(question: str) -> dict:
-    prompt = ROUTER_PROMPT.format(question=question)
     response = llm.generate(
         ROUTER_PROMPT.format(question=question)
     )
 
+    if response.startswith("Error:"):
+        print(f"ROUTER LLM ERROR → {response}")
+        return {
+            "use_rag": False,
+            "reason": "Router LLM error",
+        }
 
     try:
-       import json
-       result = json.loads(response)
-       return {
-              "use_rag": bool(result.get("use_rag", False)),
-              "reason": result.get("reason", "")
-       }
-    except Exception:
-         return {
-              "use_rag": False,
-              "reason": "Failed to parse router output"
-         }
+        # Extract first JSON object defensively
+        match = re.search(r"\{.*\}", response, re.DOTALL)
+        if not match:
+            raise ValueError("No JSON object found")
+
+        result = json.loads(match.group())
+
+        return {
+            "use_rag": bool(result.get("use_rag", False)),
+            "reason": result.get("reason", "No reason provided"),
+        }
+
+    except Exception as e:
+        print(f"ROUTER PARSE ERROR → {e} | raw={response!r}")
+        return {
+            "use_rag": False,
+            "reason": "Failed to parse router output",
+        }

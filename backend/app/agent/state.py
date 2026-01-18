@@ -6,3 +6,4 @@ class AgentState(TypedDict):
     context: Optional[str]
     decision_reason: Optional[str]
     answer: Optional[str]
+    course_hint: Optional[str]
