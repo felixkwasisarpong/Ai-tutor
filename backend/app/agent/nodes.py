@@ -3,14 +3,22 @@ from app.agent.classifier import classify_question
 from app.rag.retrieve  import retrieve_context
 from app.llm.client import OllamaClient
 import app.agent.state as state
+from app.agent.router import route_question
 
 
 llm = OllamaClient()
 
 def decide_node(state: state.AgentState) -> state.AgentState:
-    use_rag = classify_question(state["question"])
-    print(f"AGENT DECISION -> use_rag: {use_rag}")
-    return {**state,"use_rag": use_rag}
+    decision = route_question(state["question"])
+
+    print(
+        f"AGENT ROUTER → use_rag={decision['use_rag']} | "
+        f"reason={decision['reason']}"
+    )
+
+    return {
+         **state, "use_rag": decision["use_rag"], 
+         "decision_reason": decision["reason"]}
 
 
 def rag_node(state: state.AgentState) -> state.AgentState:
