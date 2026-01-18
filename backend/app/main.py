@@ -5,12 +5,13 @@ from app.rag.ingest import load_pdf, chunk_text,make_chunks
 from app.api.ask import router as ask_router
 from app.core.config import settings
 from app.health import router as health_router
-
+from app.api.admin import router as admin_router
 
 
 app = FastAPI(title=settings.app_name)
 app.include_router(health_router)
 app.include_router(ask_router)
+app.include_router(admin_router)
 PDF_PATH = "/app/data/L3-knowledgebase.pdf"
 DOCUMENTS = [
     {
