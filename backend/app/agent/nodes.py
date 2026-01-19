@@ -30,17 +30,32 @@ def rag_node(state: state.AgentState):
         course_code=state.get("course_code"),
     )
 
+    # 🔒 HARD FAIL-SAFE
+    if not results:
+        return {
+            "answer": (
+                "This question is not answered in the provided course materials."
+            ),
+            "source": f"rag:{state.get('course_code')}",
+            "citations": [],
+            "confidence": "none",
+        }
+
     answer, citations = generate_answer_with_context(
         question=state["question"],
         context=results,
     )
+    if not citations:
+        raise RuntimeError(
+            "Invariant violation: RAG node produced answer without citations"
+        )
 
     return {
         "answer": answer,
         "source": f"rag:{state.get('course_code')}",
-        "citations": format_citations(citations),
+        "citations": citations,
+        "confidence": "unknown",  # placeholder for 2.4
     }
-
 
 def llm_node(state: state.AgentState) -> state.AgentState:
     if state.get("context"):
