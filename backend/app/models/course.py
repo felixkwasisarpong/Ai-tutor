@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
 from uuid import UUID,uuid4
+from app.db.base import Base
 
-class CourseBase(BaseModel):
+class CourseBase(Base):
     code: str = Field(..., example="ENG-301")
     name: str = Field(..., example="Thermodynamics")
     semester: str = Field(..., example="Fall 2024")
