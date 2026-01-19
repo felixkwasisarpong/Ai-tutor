@@ -19,12 +19,14 @@ def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]
     return chunks
 
 def make_chunks(
-    chunks: list[str],
-    *,
+    text: str,
     department: str,
     course_code: str,
     document: str,
+    document_type: str,
 ):
+    chunks = chunk_text(text)
+
     return [
         {
             "text": chunk,
@@ -32,8 +34,9 @@ def make_chunks(
                 "department": department,
                 "course_code": course_code,
                 "document": document,
+                "document_type": document_type,
                 "chunk_index": i,
             },
         }
-    for i, chunk in enumerate(chunks)
+        for i, chunk in enumerate(chunks)
     ]

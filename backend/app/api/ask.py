@@ -8,7 +8,11 @@ from app.core.logging import logger
 from app.rag.retrieve import retrieve_context
 from app.agent.graph import build_agent
 from app.core.course_registry import get_course_by_code
-
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from app.db.deps import get_db
+from app.service.courses import get_course_by_code
+from fastapi import HTTPException
 agent = build_agent()
 router = APIRouter()
 llm = OllamaClient()
@@ -32,12 +36,16 @@ class AskResponse(BaseModel):
 
 
 @router.post("/ask", response_model=AskResponse)
-def ask_question(payload: AskRequest) -> AskResponse:
+def ask_question(payload: AskRequest, db: Session = Depends(get_db)) -> AskResponse:
 
     if payload.course_code:
         # Optional validation (kept, but now meaningful)
-        get_course_by_code(payload.course_code)
-        print("ASK PAYLOAD:", payload)
+        course = get_course_by_code(db, payload.course_code)
+        if not course:
+            HTTPException(status_code=404, detail="Course not found")
+
+
+        
         result = agent.invoke({
             "question": payload.question,
             "force_rag": True,

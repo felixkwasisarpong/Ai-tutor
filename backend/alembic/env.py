@@ -26,6 +26,24 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+import os
+from alembic import context
+
+config = context.config
+
+def get_database_url() -> str:
+    # 1️⃣ Prefer environment variable (Docker, CI, prod)
+    db_url = os.getenv("DATABASE_URL")
+    if db_url:
+        return db_url
+
+    # 2️⃣ Fallback to alembic.ini (local dev)
+    ini_url = config.get_main_option("sqlalchemy.url")
+    if ini_url:
+        return ini_url
+
+    raise RuntimeError("DATABASE_URL not set and no sqlalchemy.url in alembic.ini")
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

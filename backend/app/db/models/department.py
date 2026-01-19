@@ -1,12 +1,12 @@
 import uuid
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
-class Course(Base):
-    __tablename__ = "courses"
+class Department(Base):
+    __tablename__ = "departments"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -17,7 +17,6 @@ class Course(Base):
     code: Mapped[str] = mapped_column(
         String,
         unique=True,
-        index=True,
         nullable=False,
     )
 
@@ -26,10 +25,7 @@ class Course(Base):
         nullable=False,
     )
 
-    department_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("departments.id", ondelete="CASCADE"),
+    faculty: Mapped[str] = mapped_column(
+        String,
         nullable=False,
     )
-
-    department = relationship("Department", backref="courses")
