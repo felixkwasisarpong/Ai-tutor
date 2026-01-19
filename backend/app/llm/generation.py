@@ -6,21 +6,17 @@ llm = OllamaClient()
 def generate_answer_with_context(question: str, context: list[dict]):
     if not context:
         return (
-            "I could not find relevant information in the course materials.",
+            "This question is not answered in the provided course materials.",
             [],
         )
 
-    context_block = "\n\n".join(
-        f"[{i}] {c['text']}" for i, c in enumerate(context)
-    )
-
     prompt = f"""
-You are an academic tutor.
-Answer using ONLY the numbered course excerpts below.
-If the answer is not present, say so.
+You are a university science tutor.
+Answer ONLY using the context below.
+If the answer is not present, say so explicitly.
 
-Course Materials:
-{context_block}
+Context:
+{chr(10).join(c["text"] for c in context)}
 
 Question:
 {question}
@@ -30,13 +26,16 @@ Answer:
 
     answer = llm.generate(prompt)
 
-    citations = [
-        {
-            "document": c["metadata"].get("document"),
-            "chunk": c["metadata"].get("chunk_index"),
-        }
-        for c in context
-    ]
+    citations = []
+    for i, c in enumerate(context):
+        meta = c.get("metadata", {})
+        document = meta.get("document", "unknown")
+        chunk_index = meta.get("chunk_index")
+
+        citations.append({
+            "document": document,
+            "chunk": chunk_index,
+            "ref": f"{document} (chunk {chunk_index})",
+        })
 
     return answer, citations
-
