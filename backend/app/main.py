@@ -1,5 +1,7 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+import uuid
+
 from app.rag.store import vector_store
 from app.rag.ingest import load_pdf, chunk_text,make_chunks
 from app.api.ask import router as ask_router
@@ -9,6 +11,16 @@ from app.api.admin import router as admin_router
 
 
 app = FastAPI(title=settings.app_name)
+@app.middleware("http")
+async def add_request_id(request: Request, call_next):
+    request_id = str(uuid.uuid4())
+    request.state.request_id = request_id
+
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    return response
+
+
 app.include_router(health_router)
 app.include_router(ask_router)
 app.include_router(admin_router)
@@ -27,22 +39,10 @@ DOCUMENTS = [
 ]
 
 @app.on_event("startup")
-def load_rag_data():
+def load_vector_store():
     if vector_store.index.ntotal > 0:
-        print("RAG already loaded from disk, skipping ingestion")
-        return
-
-    for doc in DOCUMENTS:
-        if not os.path.exists(doc["path"]):
-            print(f"Missing RAG file: {doc['path']}")
-            continue
-
-        text = load_pdf(doc["path"])
-        chunks = make_chunks(
-            chunk_text(text),
-            course=doc["course"],
-            document=doc["document"],
+        print(
+            f"✅ RAG store loaded with {vector_store.index.ntotal} vectors"
         )
-
-        vector_store.add(chunks)
-        print(f"Loaded {len(chunks)} chunks from {doc['document']}")
+    else:
+        print("⚠️ RAG store is empty — awaiting admin ingestion")

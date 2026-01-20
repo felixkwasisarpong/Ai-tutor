@@ -29,14 +29,12 @@ def make_chunks(
 
     return [
         {
-            "text": chunk,
-            "metadata": {
-                "department": department,
-                "course_code": course_code,
-                "document": document,
-                "document_type": document_type,
-                "chunk_index": i,
-            },
+        "text": chunk,
+        "metadata": {
+            "course_code": course_code,
+            "document": document,
+            "chunk_index": i,
+        },
         }
         for i, chunk in enumerate(chunks)
     ]

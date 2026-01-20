@@ -47,8 +47,9 @@ class VectorStore:
             return []
 
         q_emb = self.model.encode([query])
+        search_k = self.index.ntotal if filters else k
         _, indices = self.index.search(
-            np.array(q_emb).astype("float32"), k
+            np.array(q_emb).astype("float32"), min(search_k, self.index.ntotal)
         )
 
         results = []
@@ -70,7 +71,7 @@ class VectorStore:
             if all(metadata.get(key) == value for key, value in filters.items()):
                 filtered.append(item)
 
-        return filtered
+        return filtered[:k]
     
     def _persist(self):
         print(f"Persisting FAISS index to {INDEX_PATH}")

@@ -27,7 +27,7 @@ Answer:
     answer = llm.generate(prompt)
 
     citations = []
-    for i, c in enumerate(context):
+    for c in context:
         meta = c.get("metadata", {})
         document = meta.get("document", "unknown")
         chunk_index = meta.get("chunk_index")

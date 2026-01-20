@@ -10,18 +10,30 @@ def build_agent():
     graph.add_node("rag", rag_node)
     graph.add_node("llm", llm_node)
 
+    # Entry
     graph.set_entry_point("decide")
+
+    # Deterministic routing
     graph.add_conditional_edges(
         "decide",
-        lambda state: "rag" if state.get("use_rag", False) else "llm",
-    {
-        "rag": "rag",
-        "llm": "llm"
-    },
+        lambda state: (
+            "rag" if state.get("course_code") else
+            "rag" if state.get("use_rag") else
+            "llm"
+        ),
+        {
+            "rag": "rag",
+            "llm": "llm",
+        }
     )
-
 
     graph.set_finish_point("rag")
     graph.set_finish_point("llm")
 
     return graph.compile()
+
+
+def route(state: AgentState):
+    if state.get("course_code"):
+        return "rag_only"
+    return "auto"

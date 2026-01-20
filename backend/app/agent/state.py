@@ -10,3 +10,4 @@ class AgentState(TypedDict):
     answer: Optional[str]
     source: Optional[str]
     citations: Optional[list[dict]]
+    confidence: Optional[str]
