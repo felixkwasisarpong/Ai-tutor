@@ -22,3 +22,16 @@ variable "db_password" {
     type = string
     default = "loophole@123"
 }
+
+
+variable "container_image" {
+    description = "Docker image for AI Tutor backend"
+    type        = string
+    default = "your-dockerhub-username/ai-tutor:latest"
+}
+
+
+variable "container_port" {
+  type    = number
+  default = 8000
+}
