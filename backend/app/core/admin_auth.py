@@ -13,3 +13,4 @@ def require_admin(x_admin_api_key: str = Header(...)):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid Admin API key.",
         )
+    return x_admin_api_key

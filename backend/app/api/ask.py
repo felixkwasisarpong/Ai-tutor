@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.db.deps import get_db
 from app.service.courses import get_course_by_code
 from fastapi import HTTPException
+from typing import Literal
 
 agent = build_agent()
 router = APIRouter()
@@ -33,8 +34,11 @@ class AskRequest(BaseModel):
 class AskResponse(BaseModel):
     answer: str
     source: str
-    citations: List[Citation] = []
-    confidence: str
+    citations: Optional[List[Citation]] = None
+    confidence: Literal["high", "medium", "low", "none"]
+    follow_up: Optional[
+        Literal["clarify_or_general", "ask_general"]
+    ] = None
 
 
 @router.post("/ask", response_model=AskResponse)
@@ -82,7 +86,7 @@ def ask_question(
         "answer": result["answer"],
         "source": result["source"],
         "citations": result.get("citations", []),
-        "confidence": result.get("confidence", "none"),
+        "confidence": result.get("confidence") or "none",
     }
 
 @router.get("/health")

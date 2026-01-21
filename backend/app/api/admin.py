@@ -11,9 +11,14 @@ from app.db.deps import get_db
 from sqlalchemy.orm import Session
 from app.core.admin_auth import require_admin
 from app.schemas.admin import DepartmentCreate, CourseCreate
+from app.service.document_service import next_document_version
+from app.db.models.document import Document
+import uuid
 from app.service.admin import (create_department_service,
     create_course_service,
 )
+
+from app.db.models.course import Course
 
 from app.rag.ingest import chunk_text, load_pdf, make_chunks
 
@@ -54,47 +59,119 @@ def create_course(
 
 
 @router.post(
-    "/courses/{course_code}/documents",
+    "/courses/{course_id}/documents",
     dependencies=[Depends(require_admin)],
 )
 async def upload_course_document(
-    course_code: str,
-    db: Session = Depends(get_db),
+    course_id: str,
     file: UploadFile = File(...),
     title: str = Form(...),
     document_type: str = Form("lecture"),
+    db: Session = Depends(get_db),
+    admin: str = Depends(require_admin),
 ):
-    course = get_course_by_code(db, course_code)
-
+    course = get_course_by_id_or_code(db, course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    # Save file
-    file_path = os.path.join(
-        UPLOAD_DIR, f"{course_code}_{file.filename}"
+    version = next_document_version(
+        db,
+        course_id=course.id,
+        title=title,
+        document_type=document_type,
     )
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
 
-    # Ingest
-    text = load_pdf(file_path)
+    # Deactivate previous versions
+    (
+        db.query(Document)
+        .filter(
+            Document.course_id == course.id,
+            Document.title == title,
+            Document.active == True,
+        )
+        .update({"active": False})
+    )
+
+    document = Document(
+        course_id=course.id,
+        title=title,
+        document_type=document_type,
+        version=version,
+        uploaded_by=admin,
+    )
+
+    db.add(document)
+    db.commit()
+    db.refresh(document)
+
+    # Save file path includes version
+    file_path = f"data/{course.code}/{title}_v{version}.pdf"
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
+
+    # Ingest with version metadata
     chunks = make_chunks(
-        text,
-        department=course.department.code,  # ✅ FK-resolved
+        load_pdf(file_path),
         course_code=course.code,
         document=title,
         document_type=document_type,
+        version=version,
+        document_id=str(document.id),
     )
 
     vector_store.add(chunks)
 
     return {
-        "message": "Document uploaded",
-        "course_code": course.code,
-        "course_id": course.id,
-        "title": title,
-        "document_type": document_type,
+        "document_id": document.id,
+        "version": version,
+        "status": "uploaded",
     }
+
+def get_course_by_id_or_code(db: Session, course_key: str) -> Course | None:
+    course = None
+    try:
+        course_uuid = UUID(course_key)
+    except ValueError:
+        course_uuid = None
+
+    if course_uuid is not None:
+        course = db.get(Course, course_uuid)
+
+    if not course:
+        course = get_course_by_code(db, course_key)
+
+    return course
+
+
+@router.get("/courses/{course_id}/documents", dependencies=[Depends(require_admin)])
+def list_course_documents(
+    course_id: str,
+    db: Session = Depends(get_db),
+):
+    course = get_course_by_id_or_code(db, course_id)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    documents = (
+        db.query(Document)
+        .filter(Document.course_id == course.id)
+        .order_by(Document.title, Document.version.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": d.id,
+            "title": d.title,
+            "document_type": d.document_type,
+            "version": d.version,
+            "active": d.active,
+            "uploaded_by": d.uploaded_by,
+        }
+        for d in documents
+    ]
 
 @router.get("/courses")
 def get_courses(db: Session = Depends(get_db)):

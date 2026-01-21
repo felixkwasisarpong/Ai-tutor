@@ -33,3 +33,8 @@ class Course(Base):
     )
 
     department = relationship("Department", backref="courses")
+    documents = relationship(
+        "Document",
+        back_populates="course",
+        cascade="all, delete-orphan",
+    )

@@ -19,20 +19,29 @@ def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]
     return chunks
 
 def make_chunks(
-    text: str,
-    department: str,
+    text: str | List[str],
     course_code: str,
     document: str,
-    document_type: str,
+    document_type: str | None = None,
+    department: str | None = None,
+    version: int | None = None,
+    document_id: str | None = None,
+    active: bool = True,
 ):
-    chunks = chunk_text(text)
+    chunks = text if isinstance(text, list) else chunk_text(text)
+    normalized_course_code = course_code.upper()
 
     return [
         {
         "text": chunk,
         "metadata": {
-            "course_code": course_code,
+            "course_code": normalized_course_code,
             "document": document,
+            "document_type": document_type,
+            "department": department,
+            "version": version,
+            "document_id": document_id,
+            "active": active,
             "chunk_index": i,
         },
         }

@@ -6,10 +6,14 @@ from app.rag.store import vector_store
 from typing import Optional, List, Dict
 
 
+from typing import Optional, List, Dict
+import logging
+
+logger = logging.getLogger(__name__)
+
 def retrieve_context(
     query: str,
     course_code: Optional[str] = None,
-    k: int = 3,
 ) -> Dict:
     """
     Retrieve relevant RAG chunks for a query.
@@ -21,42 +25,53 @@ def retrieve_context(
     }
     """
 
-    filters = None
-    if course_code:
-        filters = {"course_code": course_code}
-        print(f"RAG: filtered to course={course_code}")
+    # 🔒 Hard retrieval policy
+    filters = {"active": True}
 
-    # NOTE: vector_store.search does NOT support top_k
+    if course_code:
+        filters["course_code"] = course_code
+        logger.info(
+            "RAG filter applied",
+            extra={"course_code": course_code, "active": True},
+        )
+
+    # 🚫 No k / top_k here — vector store controls retrieval size
     results = vector_store.search(
         query=query,
-        k=k,
         filters=filters,
     )
 
-    context: List[Dict] = []
-    for r in results:
-        context.append(
-            {
-                "text": r["text"],
-                "metadata": r.get("metadata", {}),
-            }
-        )
+    chunks: List[Dict] = [
+        {
+            "text": r["text"],
+            "metadata": r.get("metadata", {}),
+        }
+        for r in results
+    ]
 
     # 🔢 Deterministic confidence heuristic
-    if len(context) >= 3:
-        confidence = "high"
-    elif len(context) == 2:
-        confidence = "medium"
-    elif len(context) == 1:
-        confidence = "low"
-    else:
-        confidence = "none"
+    match len(chunks):
+        case n if n >= 3:
+            confidence = "high"
+        case 2:
+            confidence = "medium"
+        case 1:
+            confidence = "low"
+        case _:
+            confidence = "none"
 
-    if context:
-        sample = context[0].get("metadata", {}).get("course_code")
-        print(f"RAG: retrieved {len(context)} chunks; sample course_code={sample!r}")
+    if chunks:
+        sample_course = chunks[0]["metadata"].get("course_code")
+        logger.info(
+            "RAG retrieved",
+            extra={
+                "chunks": len(chunks),
+                "confidence": confidence,
+                "sample_course": sample_course,
+            },
+        )
 
     return {
-        "chunks": context,
+        "chunks": chunks,
         "confidence": confidence,
     }

@@ -22,41 +22,42 @@ def decide_node(state: state.AgentState):
         **state,
         "use_rag": decision["use_rag"],
         "decision_reason": decision["reason"],
-    }
+}
 
 def rag_node(state: state.AgentState):
     retrieval = retrieve_context(
-        state["question"],
+        query=state["question"],
         course_code=state.get("course_code"),
     )
 
-    results = retrieval["chunks"]
+    chunks = retrieval["chunks"]
     confidence = retrieval["confidence"]
 
-    if not results:
+    # 🔒 HARD ACADEMIC GUARANTEE
+    if confidence == "none":
         return {
-            "answer": "This question is not answered in the provided course materials.",
+            "answer": (
+                "This question is not answered in the provided course materials."
+            ),
             "source": f"rag:{state.get('course_code')}",
             "citations": [],
             "confidence": "none",
         }
 
-    # Normal RAG path
     answer, citations = generate_answer_with_context(
         question=state["question"],
-        context=results,
+        context=chunks,
     )
-
-    if not citations:
-        raise RuntimeError(
-            "Invariant violation: RAG node produced answer without citations"
-        )
+    follow_up = None
+    if confidence in ("low", "medium"):
+        follow_up = "clarify_or_general"
 
     return {
         "answer": answer,
         "source": f"rag:{state.get('course_code')}",
         "citations": citations,
         "confidence": confidence,
+        "follow_up": follow_up,
     }
 
 def llm_node(state: state.AgentState) -> state.AgentState:
