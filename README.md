@@ -91,6 +91,18 @@ The result is **accurate, explainable, and auditable AI tutoring**.
   - chunk index
 - Transparent grounding of answers
 
+### 🧪 Confidence-Gated Academic RAG
+- Confidence levels (high / medium / low / none)
+- Refusal to answer when course material is insufficient
+- Partial-confidence follow-up hints
+- Hallucination prevention by design
+
+### 📚 Versioned & Auditable Course Documents
+- Document versioning (no silent overwrites)
+- Active/inactive document enforcement
+- Deterministic retrieval from latest official material
+- Audit-friendly academic data governance
+
 ---
 
 ## 🏗️ System Architecture
@@ -126,8 +138,9 @@ FAISS + PDFs   Ollama (Local)
 2. The agent evaluates intent and routing rules
 3. Course references **force RAG**
 4. Documents are filtered by course metadata
-5. The LLM generates a grounded response
-6. Citations are returned with the answer
+5. Confidence is computed from retrieved material and enforced by the agent.
+6. The LLM generates a grounded response
+7. Citations are returned with the answer
 
 ---
 
@@ -246,12 +259,13 @@ POST /ask
 - PostgreSQL-backed university schema
 - Citation-aware responses
 - Local LLM inference (Ollama)
+- Confidence-based clarification
+- Document versioning and supersession
 
 ### 🔜 Planned
 - Admin UI
 - Student UI
 - Streaming responses
-- Confidence-based clarification
 - AWS deployment (Terraform + ECS + RDS)
 
 ---
