@@ -9,7 +9,7 @@ resource "aws_lb_target_group" "backend" {
   name        = "${var.app_name}-tg"
   port        = 8000
   protocol    = "HTTP"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = aws_vpc.this.id
   target_type = "ip"
 
   health_check {

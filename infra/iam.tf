@@ -16,7 +16,7 @@ resource "aws_iam_role" "ecs_task_execution" {
 }
 
 resource "aws_iam_role_policy" "ecs_secrets" {
-  role = aws_iam_role.ecs_task_role.id
+  role = aws_iam_role.ecs_task_execution.id
 
   policy = jsonencode({
     Version = "2012-10-17"

@@ -1,6 +1,6 @@
 resource "aws_security_group" "alb" {
   name   = "${var.app_name}-alb-sg"
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.this.id
 
   ingress {
     from_port   = 80
@@ -19,7 +19,7 @@ resource "aws_security_group" "alb" {
 
 resource "aws_security_group" "ecs" {
   name   = "${var.app_name}-ecs-sg"
-  vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.this.id
 
   ingress {
     from_port       = 8000
