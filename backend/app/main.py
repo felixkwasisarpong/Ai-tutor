@@ -8,9 +8,13 @@ from app.api.ask import router as ask_router
 from app.core.config import settings
 from app.health import router as health_router
 from app.api.admin import router as admin_router
+from app.core.middleware.request_id import RequestIdMiddleware
+from app.core.logging import setup_logging
 
 
 app = FastAPI(title=settings.app_name)
+app.add_middleware(RequestIdMiddleware)
+setup_logging()
 @app.middleware("http")
 async def add_request_id(request: Request, call_next):
     request_id = str(uuid.uuid4())
@@ -24,6 +28,7 @@ async def add_request_id(request: Request, call_next):
 app.include_router(health_router)
 app.include_router(ask_router)
 app.include_router(admin_router)
+app.include_router(health_router)
 PDF_PATH = "/app/data/L3-knowledgebase.pdf"
 DOCUMENTS = [
     {
