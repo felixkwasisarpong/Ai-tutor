@@ -1,2 +1,14 @@
 key
 data
+/Users/Apple/Documents/Personal Projects/Ai Tutor/infra/.terraform
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Alembic cache
+alembic/__pycache__/
+
+# Local env
+.env
