@@ -1,6 +1,10 @@
 key
 data
-/Users/Apple/Documents/Personal Projects/Ai Tutor/infra/.terraform
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
 
 # Python
 __pycache__/
