@@ -35,3 +35,18 @@ variable "container_port" {
   type    = number
   default = 8000
 }
+
+variable "database_url" {
+    type = string
+    sensitive = true
+}
+
+variable "admin_api_key" {
+    type = string
+    sensitive = true
+}
+
+variable "backend_image" {
+  description = "Docker image for AI Tutor backend"
+  type        = string
+}

@@ -11,44 +11,36 @@ resource "aws_ecs_task_definition" "backend" {
   memory                   = "1024"
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
 
-  container_definitions = jsonencode([
+    container_definitions = jsonencode([
     {
-      name      = "backend"
-      image     = var.container_image
-      essential = true
+        name  = "backend"
+        image = var.backend_image
 
-      portMappings = [
-        {
-          containerPort = var.container_port
-          protocol      = "tcp"
-        }
-      ]
+        portMappings = [{
+        containerPort = 8000
+        }]
 
-      environment = [
+        secrets = [
         {
-          name  = "DATABASE_URL"
-          value = "postgresql+psycopg2://${var.db_username}:${var.db_password}@${aws_db_instance.postgres.address}:5432/${var.db_name}"
+            name      = "DATABASE_URL"
+            valueFrom = aws_secretsmanager_secret.database_url.arn
         },
         {
-          name  = "OLLAMA_BASE_URL"
-          value = "http://ollama:11434"
-        },
-        {
-          name  = "ADMIN_API_KEY"
-          value = "super-secret-admin-key"
+            name      = "ADMIN_API_KEY"
+            valueFrom = aws_secretsmanager_secret.admin_api_key.arn
         }
-      ]
+        ]
 
-      logConfiguration = {
+        logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = "/ecs/${var.app_name}"
-          awslogs-region        = var.aws_region
-          awslogs-stream-prefix = "backend"
+            awslogs-group         = aws_cloudwatch_log_group.backend.name
+            awslogs-region        = var.aws_region
+            awslogs-stream-prefix = "backend"
         }
-      }
+        }
     }
-  ])
+    ])
 }
 
 resource "aws_ecs_service" "backend" {
@@ -73,7 +65,7 @@ resource "aws_ecs_service" "backend" {
   cluster         = aws_ecs_cluster.this.id
   task_definition = aws_ecs_task_definition.backend.arn
   launch_type     = "FARGATE"
-  desired_count   = 1
+
 
   network_configuration {
     subnets         = [aws_subnet.private.id]
