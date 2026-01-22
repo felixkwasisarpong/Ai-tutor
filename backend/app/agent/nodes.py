@@ -6,6 +6,9 @@ import app.agent.state as state
 from app.agent.router import route_question
 from app.llm.generation import generate_answer_with_context
 from app.rag.citation import format_citations
+import time
+from app.core.logging import logger
+import logging
 
 llm = OllamaClient()
 
@@ -77,7 +80,9 @@ Answer:
     else:
         prompt = state["question"]
 
+    start = time.time()
     answer = llm.generate(prompt)
+    logger.info("LLM inference completed", extra={"latency_ms": int((time.time()-start)*1000)})
 
     return {
         **state,
