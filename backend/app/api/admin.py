@@ -37,7 +37,7 @@ def create_department(
     logger.info(
     "Admin action",
     extra={
-        "action": "create_course",
+        "action": "create_department",
         "course_code": payload.code,
         "request_id": request.state.request_id,
     },
