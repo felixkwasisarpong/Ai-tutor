@@ -8,7 +8,9 @@ services:
     environment:
       - DATABASE_URL=postgresql+psycopg2://ai_tutor:ai_tutor@db:5432/ai_tutor
       - ADMIN_API_KEY=super-secret-admin-key
+      - LLM_PROVIDER=ollama
       - OLLAMA_BASE_URL=http://ollama:11434
+      - LLM_TIMEOUT_SECONDS=300
     volumes:
       - ./data:/app/data  
       - rag-store:/app/rag_store  

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile
+from fastapi import APIRouter, HTTPException, UploadFile,Request
 from pydantic import BaseModel
 import os
 from fastapi import File, Form, Depends
@@ -19,19 +19,29 @@ from app.service.admin import (create_department_service,
 )
 
 from app.db.models.course import Course
-
+from app.core.logging import logger
 from app.rag.ingest import chunk_text, load_pdf, make_chunks
 
-router = APIRouter(prefix="/admin", tags=["admin"])
+router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
 UPLOAD_DIR = "data/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-@router.post("/departments", dependencies=[Depends(require_admin)])
+@router.post("/departments")
 def create_department(
     payload: DepartmentCreate,
+    request: Request,     
     db: Session = Depends(get_db),
 ):
+    
+    logger.info(
+    "Admin action",
+    extra={
+        "action": "create_course",
+        "course_code": payload.code,
+        "request_id": request.state.request_id,
+    },
+)
     department = create_department_service(db, payload)
     return {
         "id": department.id,
@@ -41,11 +51,21 @@ def create_department(
     }
 
 
-@router.post("/courses", dependencies=[Depends(require_admin)])
+@router.post("/courses")
 def create_course(
     payload: CourseCreate,
+    request: Request,
     db: Session = Depends(get_db),
 ):
+    
+    logger.info(
+    "Admin action",
+    extra={
+        "action": "create_course",
+        "course_code": payload.code,
+        "request_id": request.state.request_id,
+    },
+)
     course = create_course_service(db, payload)
     return {
         "id": course.id,
@@ -60,7 +80,6 @@ def create_course(
 
 @router.post(
     "/courses/{course_id}/documents",
-    dependencies=[Depends(require_admin)],
 )
 async def upload_course_document(
     course_id: str,
