@@ -1,2 +1,18 @@
 key
 data
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Alembic cache
+alembic/__pycache__/
+
+# Local env
+.env
