@@ -10,7 +10,7 @@ from app.agent.graph import build_agent
 from app.core.course_registry import get_course_by_code
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
-from app.db.deps import get_db
+from app.db.deps import get_db, require_student
 from app.service.courses import get_course_by_code
 from fastapi import HTTPException
 from typing import Literal
@@ -41,7 +41,7 @@ class AskResponse(BaseModel):
     ] = None
 
 
-@router.post("/ask", response_model=AskResponse)
+@router.post("/ask", response_model=AskResponse,dependencies=[Depends(require_student)])
 def ask_question(
     payload: AskRequest,
     request: Request,

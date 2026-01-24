@@ -249,6 +249,19 @@ POST /ask
 
 ---
 
+
+## 🛡️ Platform Hardening (Phase 5)
+
+AI Tutor has completed a full platform-hardening phase focused on production readiness and academic integrity.
+
+This phase includes:
+- **Observability**: request IDs, structured logging, health and readiness checks, and admin audit logs
+- **Inference robustness**: agentic routing, confidence-gated RAG, and explicit refusal policies
+- **Security boundaries**: admin-only authentication for academic data control
+- **UX planning**: finalized student and admin interaction flows with stable API contracts
+
+Phase 5 intentionally prioritizes correctness, traceability, and operational safety over feature velocity.
+
 ## 🛣️ Roadmap
 
 ### ✅ Completed
