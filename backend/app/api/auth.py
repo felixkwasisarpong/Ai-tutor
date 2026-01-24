@@ -67,3 +67,25 @@ def refresh_access_token(
     })
 
     return {"access_token": access_token}
+
+
+@router.post("/auth/logout")
+def logout(
+    refresh_token: str,
+    db: Session = Depends(get_db),
+):
+    token_hash = hash_refresh_token(refresh_token)
+
+    record = (
+        db.query(RefreshToken)
+        .filter_by(token_hash=token_hash, revoked=False)
+        .first()
+    )
+
+    if not record:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    record.revoked = True
+    db.commit()
+
+    return {"message": "Logged out successfully"}
