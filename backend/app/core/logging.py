@@ -1,8 +1,6 @@
 import logging
 import json
 
-logger = logging.getLogger("app")
-
 class JsonFormatter(logging.Formatter):
     def format(self, record):
         log = {
