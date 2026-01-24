@@ -9,7 +9,7 @@ from app.core.course_registry import get_course_by_code, get_all_courses
 from app.service.courses import get_course_by_code, list_courses
 from app.db.deps import get_db
 from sqlalchemy.orm import Session
-from app.core.admin_auth import require_admin
+from app.core.dependencies import require_admin
 from app.schemas.admin import DepartmentCreate, CourseCreate
 from app.service.document_service import next_document_version
 from app.db.models.document import Document
