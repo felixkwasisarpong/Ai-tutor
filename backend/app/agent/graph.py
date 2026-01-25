@@ -17,8 +17,8 @@ def build_agent():
     graph.add_conditional_edges(
         "decide",
         lambda state: (
-            "rag" if state.get("course_code") else
-            "rag" if state.get("use_rag") else
+            "rag" if state.course_code else
+            "rag" if state.use_rag else
             "llm"
         ),
         {
@@ -34,6 +34,6 @@ def build_agent():
 
 
 def route(state: AgentState):
-    if state.get("course_code"):
+    if state.course_code:
         return "rag_only"
     return "auto"
