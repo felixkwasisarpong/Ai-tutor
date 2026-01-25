@@ -1,8 +1,8 @@
-# 🎓 AI Tutor — Agentic RAG Learning Assistant
+# 🎓 Canon — Agentic RAG Academic Correctness & Citation-First AI Platform
 
-![AI Tutor Banner](docs/banner.png)
+![Canon Banner](docs/banner.png)
 
-> **A production-grade, agentic, course-aware AI tutor backend for university-level sciences — combining Retrieval-Augmented Generation (RAG), LangGraph-based decision logic, structured academic data models, and local LLM inference.**
+> **A production-grade, agentic, course-aware AI academic platform for university-level sciences — combining Retrieval-Augmented Generation (RAG), LangGraph-based decision logic, structured academic data models, and local LLM inference.**
 
 ---
 
@@ -22,24 +22,24 @@
 
 ---
 
-## 🔥 Why AI Tutor?
+## 🔥 Why Canon?
 
-**AI Tutor is not a generic chatbot.**  
-It is a **teaching-first AI backend** designed for real academic environments.
+**Canon is not a generic chatbot or tutor.**  
+It is an **academic correctness and citation-first AI backend** designed for real university-level academic environments.
 
-Unlike chatbots that guess, AI Tutor:
+Unlike chatbots that guess, Canon:
 - Enforces **course-grounded answers**
 - Uses **official course documents**
 - Applies **deterministic routing policies**
 - Separates **admin data control** from student usage
 
-This dramatically reduces hallucinations in academic settings.
+This dramatically reduces hallucinations and enforces academic integrity.
 
 ---
 
 ## 🧠 About
 
-AI Tutor is an **agentic backend** built to support **Computer Science, Engineering, Physics, and Information Theory** courses.
+Canon is an **agentic backend** built to support **Computer Science, Engineering, Physics, and Information Theory** courses.
 
 It combines:
 - A structured **University-style data model**
@@ -47,7 +47,7 @@ It combines:
 - **Metadata-aware RAG**
 - **Local LLM inference** (no external APIs)
 
-The result is **accurate, explainable, and auditable AI tutoring**.
+The result is **accurate, explainable, auditable, and citation-aware AI academic assistance**.
 
 ---
 
@@ -248,6 +248,19 @@ POST /ask
 ```
 
 ---
+
+
+## 🛡️ Platform Hardening (Phase 5)
+
+Canon has completed a full platform-hardening phase focused on production readiness and academic integrity.
+
+This phase includes:
+- **Observability**: request IDs, structured logging, health and readiness checks, and admin audit logs
+- **Inference robustness**: agentic routing, confidence-gated RAG, and explicit refusal policies
+- **Security boundaries**: admin-only authentication for academic data control
+- **UX planning**: finalized student and admin interaction flows with stable API contracts
+
+Phase 5 intentionally prioritizes correctness, traceability, and operational safety over feature velocity.
 
 ## 🛣️ Roadmap
 

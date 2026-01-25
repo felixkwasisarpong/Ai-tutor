@@ -1,13 +1,32 @@
-from typing import TypedDict, Literal, Optional
+from typing import Dict, List, TypedDict, Literal, Optional
+from pydantic import BaseModel
 
-class AgentState(TypedDict):
+
+class VerifiedContext(BaseModel):
+    course_code: str
+    chunks: list[Dict]
+    expires_at: float
+
+class AgentState(BaseModel):
     question: str
-    force_rag: bool
-    course_code: Optional[str]
-    course_id: Optional[str]
-    use_rag: Optional[bool]
-    decision_reason: Optional[str]
-    answer: Optional[str]
-    source: Optional[str]
-    citations: Optional[list[dict]]
-    confidence: Optional[str]
+    course_code: Optional[str] = None
+
+    # Routing
+    force_rag: bool = False
+    use_rag: Optional[bool] = None
+    decision_reason: Optional[str] = None
+
+    # RAG output
+    context: Optional[List[Dict]] = None
+    confidence: Optional[str] = None
+
+    # ✅ NEW: follow-up safe memory
+    verified_context: Optional[VerifiedContext] = None
+
+    # Policy flags
+    blocked: Optional[bool] = False
+
+    # Final output
+    answer: Optional[str] = None
+    citations: Optional[List[Dict]] = None
+    source: Optional[str] = None
