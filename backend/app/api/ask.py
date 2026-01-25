@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from app.models.ask import AskRequest
 from app.llm.prompts import default_prompt
 from app.llm.client import OllamaClient
-from app.core.logging import logger
 from app.rag.retrieve import retrieve_context
 from app.agent.graph import build_agent
 from app.core.course_registry import get_course_by_code
@@ -14,6 +13,7 @@ from app.db.deps import get_db, require_student
 from app.service.courses import get_course_by_code
 from fastapi import HTTPException
 from typing import Literal
+from app.core.logging import logger
 
 agent = build_agent()
 router = APIRouter()
@@ -39,7 +39,6 @@ class AskResponse(BaseModel):
     follow_up: Optional[
         Literal["clarify_or_general", "ask_general"]
     ] = None
-
 
 @router.post("/ask", response_model=AskResponse,dependencies=[Depends(require_student)])
 def ask_question(
