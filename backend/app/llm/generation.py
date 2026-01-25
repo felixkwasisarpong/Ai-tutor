@@ -1,22 +1,44 @@
 from app.llm.client import OllamaClient
+from typing import Optional
 
 llm = OllamaClient()
 
 
-def generate_answer_with_context(question: str, context: list[dict]):
+from typing import Optional
+
+def generate_answer_with_context(
+    question: str,
+    context: list[dict],
+    extra_context: Optional[str] = None,
+):
     if not context:
         return (
             "This question is not answered in the provided course materials.",
             [],
         )
 
+    course_context = "\n".join(c["text"] for c in context)
+
+    supplemental = ""
+    if extra_context:
+        supplemental = f"""
+Supplemental material provided by the user:
+{extra_context}
+"""
+
     prompt = f"""
 You are a university science tutor.
-Answer ONLY using the context below.
-If the answer is not present, say so explicitly.
 
-Context:
-{chr(10).join(c["text"] for c in context)}
+Rules:
+- Answer using the official course material first.
+- Use supplemental material only to clarify or expand.
+- If the answer is not present in the course material, say so explicitly.
+- Do NOT invent facts.
+
+Course Material:
+{course_context}
+
+{supplemental}
 
 Question:
 {question}
