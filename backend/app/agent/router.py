@@ -37,7 +37,17 @@ COURSE_HINT_KEYWORDS = [
     "notes",
     "in class",
 ]
-
+FOLLOW_UP_MARKERS = (
+    "why",
+    "how",
+    "what about",
+    "can you explain",
+    "does that mean",
+    "in that case",
+)
+def is_follow_up(question: str) -> bool:
+    q = question.lower()
+    return any(marker in q for marker in FOLLOW_UP_MARKERS)
 
 def route_question(question: str) -> dict:
     q = question.lower()

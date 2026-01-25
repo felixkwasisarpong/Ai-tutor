@@ -1,5 +1,5 @@
 from app.llm.client import OllamaClient
-from app.core.logging import logger
+
 llm = OllamaClient()
 
 
