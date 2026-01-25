@@ -23,6 +23,9 @@ class AgentState(BaseModel):
     # ✅ NEW: follow-up safe memory
     verified_context: Optional[VerifiedContext] = None
 
+    # Policy flags
+    blocked: Optional[bool] = False
+
     # Final output
     answer: Optional[str] = None
     citations: Optional[List[Dict]] = None
