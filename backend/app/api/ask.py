@@ -14,6 +14,10 @@ from app.service.courses import get_course_by_code
 from fastapi import HTTPException
 from typing import Literal
 from app.core.logging import logger
+from app.input.normalize import normalize_input
+from fastapi import File, UploadFile
+
+
 
 agent = build_agent()
 router = APIRouter()
@@ -40,14 +44,19 @@ class AskResponse(BaseModel):
         Literal["clarify_or_general", "ask_general"]
     ] = None
 
+
 @router.post("/ask", response_model=AskResponse,dependencies=[Depends(require_student)])
 def ask_question(
     payload: AskRequest,
     request: Request,
+    file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ) -> AskResponse:
     request_id = request.state.request_id
-
+    normalized = normalize_input(
+        questions=payload.question,
+        file= file if "file" in locals() else None,
+    )
     logger.info(
         "ASK request received",
         extra={
