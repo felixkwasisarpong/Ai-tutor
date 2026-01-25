@@ -7,7 +7,7 @@ from app.agent.router import route_question
 from app.llm.generation import generate_answer_with_context
 from app.rag.citation import format_citations
 import time
-
+from app.agent.policies.homework import is_homework_question
 
 from app.core.logging import logger
 
@@ -17,6 +17,15 @@ CONTEXT_TTL_SECONDS = 300  # 5 minutes
 
 def decide_node(state: AgentState):
     state_data = state.model_dump()
+
+        #Academic integrity check
+    if is_homework_question(state.question):
+        return {
+            **state_data,
+            "use_rag": True,
+            "blocked": True,
+            "decision_reason": "homework question detected",
+        }
     # 🔒 Rule 1: Explicit course force (unchanged)
     if state.force_rag:
         return {
@@ -57,6 +66,19 @@ def rag_node(state: AgentState):
 
     chunks = retrieval["chunks"]
     confidence = retrieval["confidence"]
+
+    if state.blocked:
+        return {
+            "answer": (
+                "I can’t help solve graded assignments or exams. "
+                "However, I can explain the underlying concepts or walk "
+                "through similar ungraded examples if you’d like."
+            ),
+            "source": "policy",
+            "citations": [],
+            "confidence": "none",
+            "follow_up": "conceptual_help",
+        }
 
     # 🔒 HARD ACADEMIC GUARANTEE (unchanged)
     if confidence == "none":
