@@ -1,7 +1,6 @@
 from typing import List, Optional
 from fastapi import APIRouter
 from pydantic import BaseModel
-from app.models.ask import AskRequest
 from app.llm.prompts import default_prompt
 from app.llm.client import OllamaClient
 from app.rag.retrieve import retrieve_context
@@ -14,6 +13,10 @@ from app.service.courses import get_course_by_code
 from fastapi import HTTPException
 from typing import Literal
 from app.core.logging import logger
+from app.input.normalize import normalize_input
+from fastapi import File, UploadFile, Form
+
+
 
 agent = build_agent()
 router = APIRouter()
@@ -26,11 +29,6 @@ class Citation(BaseModel):
     ref: str | None = None
 
 
-class AskRequest(BaseModel):
-    question: str
-    course_code: str | None = None
-
-
 class AskResponse(BaseModel):
     answer: str
     source: str
@@ -40,43 +38,62 @@ class AskResponse(BaseModel):
         Literal["clarify_or_general", "ask_general"]
     ] = None
 
-@router.post("/ask", response_model=AskResponse,dependencies=[Depends(require_student)])
+
+@router.post(
+    "/ask",
+    response_model=AskResponse,
+    dependencies=[Depends(require_student)],
+)
 def ask_question(
-    payload: AskRequest,
     request: Request,
+    file: Optional[UploadFile] = File(None),
+    question: str = Form(...),
+    course_code: str | None = Form(None),
     db: Session = Depends(get_db),
 ) -> AskResponse:
     request_id = request.state.request_id
+
+    normalized = normalize_input(
+        question=question,
+        file=file,
+    )
 
     logger.info(
         "ASK request received",
         extra={
             "request_id": request_id,
-            "course_code": payload.course_code,
-            "question": payload.question,
+            "course_code": course_code,
+            "question": question,
+            "modality": normalized["modality"],
         },
     )
 
-    if payload.course_code:
-        course = get_course_by_code(db, payload.course_code)
+    if course_code:
+        course = get_course_by_code(db, course_code)
         if not course:
             raise HTTPException(status_code=404, detail="Course not found")
 
         result = agent.invoke({
-            "question": payload.question,
+            "question": normalized["question"],
+            "extra_context": normalized["context_text"],
+            "modality": normalized["modality"],
             "force_rag": True,
-            "course_code": payload.course_code,
+            "course_code": course_code,
             "request_id": request_id,
         })
 
-        if result["source"].startswith("rag") and result.get("citations") is None:
+        if (
+            result["source"].startswith("rag")
+            and result.get("confidence") != "none"
+            and not result.get("citations")
+        ):
             raise HTTPException(
                 status_code=500,
                 detail="Invariant violation: RAG response missing citations",
             )
     else:
         result = agent.invoke({
-            "question": payload.question,
+            "question": normalized["question"],
             "force_rag": False,
             "request_id": request_id,
         })
@@ -85,7 +102,7 @@ def ask_question(
         "answer": result["answer"],
         "source": result["source"],
         "citations": result.get("citations", []),
-        "confidence": result.get("confidence") or "none",
+        "confidence": result.get("confidence", "none"),
     }
 
 @router.get("/health")
