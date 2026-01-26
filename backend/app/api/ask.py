@@ -116,10 +116,30 @@ Accepts raw audio bytes from live recording.
 Returns transcribed text.
 """
 # Placeholder (Phase 6B.4.3)
-raise HTTPException(
-    status_code=501,
-    detail="Live speech transcription not yet configured",
-)
+    raise HTTPException(
+        status_code=501,
+        detail="Live speech transcription not yet configured",
+    )
+
+
+@router.post("/ocr")
+async def extract_text_from_image(
+    
+    image: UploadFile = File(...),
+):
+    """
+Extract text from an image.
+"""
+    if not image.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Invalid image type")
+
+
+    raise HTTPException(
+        status_code=501,
+        detail="Image OCR not yet configured",
+    )
+
+
 
 
 @router.get("/health")
