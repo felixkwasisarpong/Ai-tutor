@@ -65,10 +65,26 @@ class VectorStore:
         if not filters:
             return results
 
+        def matches_filters(metadata: dict, filters: dict) -> bool:
+            for key, value in filters.items():
+                if key == "active" and value is True:
+                    if metadata.get("active", True) is not True:
+                        return False
+                    continue
+                if key == "course_code":
+                    meta_val = metadata.get(key)
+                    if isinstance(meta_val, str) and isinstance(value, str):
+                        if meta_val.upper() != value.upper():
+                            return False
+                        continue
+                if metadata.get(key) != value:
+                    return False
+            return True
+
         filtered = []
         for item in results:
             metadata = item.get("metadata", {})
-            if all(metadata.get(key) == value for key, value in filters.items()):
+            if matches_filters(metadata, filters):
                 filtered.append(item)
 
         return filtered[:k]

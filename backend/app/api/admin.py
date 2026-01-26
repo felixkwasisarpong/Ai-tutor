@@ -86,7 +86,7 @@ async def upload_course_document(
     title: str = Form(...),
     document_type: str = Form("lecture"),
     db: Session = Depends(get_db),
-    admin: str = Depends(require_admin),
+    admin = Depends(require_admin),
 ):
     course = get_course_by_id_or_code(db, course_id)
     if not course:
@@ -115,7 +115,7 @@ async def upload_course_document(
         title=title,
         document_type=document_type,
         version=version,
-        uploaded_by=admin,
+        uploaded_by=admin.email,
     )
 
     db.add(document)

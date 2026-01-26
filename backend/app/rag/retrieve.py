@@ -29,10 +29,10 @@ def retrieve_context(
     filters = {"active": True}
 
     if course_code:
-        filters["course_code"] = course_code
+        filters["course_code"] = course_code.upper()
         logger.info(
             "RAG filter applied",
-            extra={"course_code": course_code, "active": True},
+            extra={"course_code": filters["course_code"], "active": True},
         )
 
     # 🚫 No k / top_k here — vector store controls retrieval size
