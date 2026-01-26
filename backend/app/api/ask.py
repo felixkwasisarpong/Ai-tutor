@@ -15,6 +15,7 @@ from typing import Literal
 from app.core.logging import logger
 from app.input.normalize import normalize_input
 from fastapi import File, UploadFile, Form
+from fastapi import Body
 
 
 
@@ -104,6 +105,22 @@ def ask_question(
         "citations": result.get("citations", []),
         "confidence": result.get("confidence", "none"),
     }
+
+@router.post("/transcribe")
+def transcribe_audio(
+    request: Request,
+    audio: bytes = Body(...)
+):
+    """
+Accepts raw audio bytes from live recording.
+Returns transcribed text.
+"""
+# Placeholder (Phase 6B.4.3)
+raise HTTPException(
+    status_code=501,
+    detail="Live speech transcription not yet configured",
+)
+
 
 @router.get("/health")
 def health_check() -> dict:
