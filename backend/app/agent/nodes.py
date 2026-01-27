@@ -91,11 +91,13 @@ def rag_node(state: AgentState):
             "citations": [],
             "confidence": "none",
             "verified_context": None,
+            "follow_up": None,
         }
 
     answer, citations = generate_answer_with_context(
         question=state.question,
         context=chunks,
+        extra_context=state.extra_context,
     )
 
     # 🧠 NEW: Verified academic memory (ONLY if citations exist)
