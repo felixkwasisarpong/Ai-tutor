@@ -35,10 +35,7 @@ class AskResponse(BaseModel):
     source: str
     citations: Optional[List[Citation]] = None
     confidence: Literal["high", "medium", "low", "none"]
-    follow_up: Optional[
-        Literal["clarify_or_general", "ask_general"]
-    ] = None
-
+    follow_up: Optional[str] = None
 
 @router.post(
     "/ask",
@@ -104,6 +101,7 @@ def ask_question(
         "source": result["source"],
         "citations": result.get("citations", []),
         "confidence": result.get("confidence", "none"),
+        "follow_up": result.get("follow_up"),
     }
 
 @router.post("/transcribe")
