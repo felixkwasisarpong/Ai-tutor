@@ -30,6 +30,7 @@ class AgentState(BaseModel):
     answer: Optional[str] = None
     citations: Optional[List[Dict]] = None
     source: Optional[str] = None
+    follow_up: Optional[str] = None
 
     extra_context: Optional[str]
     modality: str
