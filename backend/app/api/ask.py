@@ -16,6 +16,13 @@ from app.core.logging import logger
 from app.input.normalize import normalize_input
 from fastapi import File, UploadFile, Form
 from fastapi import Body
+from app.memory.store import ConversationMemory
+from app.memory.models import MemoryEntry
+from datetime import datetime
+from app.memory.policy import summarize_intent
+
+
+
 
 
 
@@ -37,6 +44,8 @@ class AskResponse(BaseModel):
     confidence: Literal["high", "medium", "low", "none"]
     follow_up: Optional[str] = None
 
+memory = ConversationMemory()
+
 @router.post(
     "/ask",
     response_model=AskResponse,
@@ -55,7 +64,7 @@ def ask_question(
         question=question,
         file=file,
     )
-
+    intent_hint = summarize_intent(memory.list())
     logger.info(
         "ASK request received",
         extra={
@@ -76,9 +85,20 @@ def ask_question(
             "extra_context": normalized["context_text"],
             "modality": normalized["modality"],
             "force_rag": True,
+            "intent_hint": intent_hint,
             "course_code": course_code,
             "request_id": request_id,
         })
+
+        memory.add(
+            MemoryEntry(
+                question= question,
+                course_code=course_code,
+                confidence=result.get("confidence"),
+                follow_up=result.get("follow_up"),
+                timestamp=datetime.utcnow(),
+            )
+        )
 
         if (
             result["source"].startswith("rag")
