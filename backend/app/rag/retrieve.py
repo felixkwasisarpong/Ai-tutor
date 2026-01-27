@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 def retrieve_context(
     query: str,
     course_code: Optional[str] = None,
+    k: int = 3,
 ) -> Dict:
     """
     Retrieve relevant RAG chunks for a query.
@@ -41,16 +42,23 @@ def retrieve_context(
         filters=filters,
     )
 
-    chunks: List[Dict] = [
-        {
-            "text": r["text"],
-            "metadata": r.get("metadata", {}),
-        }
-        for r in results
-    ]
+    seen = set()
+    unique_chunks = []
+
+    for r in results:
+        meta = r.get("metadata", {})
+        key = (meta.get("document"), meta.get("chunk_index"))
+
+        if key in seen:
+            continue
+
+        seen.add(key)
+        unique_chunks.append(r)
+    unique_chunks = unique_chunks[:k]
+
 
     # 🔢 Deterministic confidence heuristic
-    match len(chunks):
+    match len(unique_chunks):
         case n if n >= 3:
             confidence = "high"
         case 2:
@@ -60,18 +68,18 @@ def retrieve_context(
         case _:
             confidence = "none"
 
-    if chunks:
-        sample_course = chunks[0]["metadata"].get("course_code")
+    if unique_chunks:
+        sample_course = unique_chunks[0]["metadata"].get("course_code")
         logger.info(
             "RAG retrieved",
             extra={
-                "chunks": len(chunks),
+                "chunks": len(unique_chunks),
                 "confidence": confidence,
                 "sample_course": sample_course,
             },
         )
 
     return {
-        "chunks": chunks,
+        "chunks": unique_chunks,
         "confidence": confidence,
     }
