@@ -97,6 +97,24 @@ The result is **accurate, explainable, auditable, and citation-aware AI academic
 - Partial-confidence follow-up hints
 - Hallucination prevention by design
 
+### 🔁 Policy-Gated Follow-Up Questions
+- Follow-up prompts emitted explicitly by the agent (not free-form chat)
+- Triggered only for low / medium confidence answers
+- Follow-ups treated as fresh academic queries
+- Prevents conversational drift and citation bypass
+
+### 🧠 Bounded Conversation Memory
+- Short-lived, per-request academic memory
+- Used only to support explicit follow-up questions
+- Time- and size-bounded to prevent hallucination drift
+- Never treated as ground truth or cited material
+
+### 🧩 Multi-Modal Question Normalization
+- Supports text + PDF supplementary context
+- OCR scaffolding for images (exam-style diagrams, notes)
+- Modality-aware agent routing
+- Preserves citation and confidence guarantees
+
 ### 📚 Versioned & Auditable Course Documents
 - Document versioning (no silent overwrites)
 - Active/inactive document enforcement
@@ -138,7 +156,7 @@ FAISS + PDFs   Ollama (Local)
 2. The agent evaluates intent and routing rules
 3. Course references **force RAG**
 4. Documents are filtered by course metadata
-5. Confidence is computed from retrieved material and enforced by the agent.
+5. Confidence is computed deterministically and follow-up eligibility is evaluated
 6. The LLM generates a grounded response
 7. Citations are returned with the answer
 
@@ -272,14 +290,28 @@ Phase 5 intentionally prioritizes correctness, traceability, and operational saf
 - PostgreSQL-backed university schema
 - Citation-aware responses
 - Local LLM inference (Ollama)
-- Confidence-based clarification
-- Document versioning and supersession
+- Confidence-gated answers (high / medium / low / none)
+- Policy-gated follow-up questions
+- Bounded conversation memory (TTL-based)
+- Multi-modal input normalization (text + PDF)
+- Observability (request IDs, structured logging)
 
 ### 🔜 Planned
-- Admin UI
-- Student UI
-- Streaming responses
-- AWS deployment (Terraform + ECS + RDS)
+- Audio input (live speech-to-text)
+- Image input (OCR for handwritten / diagram-based questions)
+- Student UI (citation viewer, confidence indicators)
+- Admin UI (course & document management)
+- AWS deployment (Terraform + ECS)
+
+---
+
+## 🎯 Design Philosophy
+
+Canon is built around a single principle:
+**Academic correctness beats conversational fluency.**
+
+Every system boundary — routing, retrieval, memory, and generation —
+is designed to make uncertainty explicit and hallucinations impossible by default.
 
 ---
 
