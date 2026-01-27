@@ -55,6 +55,7 @@ def decide_node(state: AgentState):
         **state_data,
         "use_rag": decision["use_rag"],
         "decision_reason": decision["reason"],
+        "follow_up": state_data.get("follow_up"),
     }
 
 def rag_node(state: AgentState):
@@ -69,6 +70,7 @@ def rag_node(state: AgentState):
 
     if state.blocked:
         return {
+            **state_data,
             "answer": (
                 "I can’t help solve graded assignments or exams. "
                 "However, I can explain the underlying concepts or walk "
@@ -78,6 +80,7 @@ def rag_node(state: AgentState):
             "citations": [],
             "confidence": "none",
             "follow_up": "conceptual_help",
+            "verified_context": None,
         }
 
     # 🔒 HARD ACADEMIC GUARANTEE (unchanged)
