@@ -27,6 +27,16 @@ export default function LoginPage() {
           return formData;
         })(),
 =======
+<<<<<<< HEAD
+      const res = await fetch("http://localhost:8000/auth/login", {
+        method: "POST",
+        body: (() => {
+          const formData = new FormData();
+          formData.append("email", email);
+          formData.append("password", password);
+          return formData;
+        })(),
+=======
       const body = new URLSearchParams({
         email,
         password,
@@ -38,6 +48,7 @@ export default function LoginPage() {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body,
+>>>>>>> origin/main
 >>>>>>> origin/main
       });
 
