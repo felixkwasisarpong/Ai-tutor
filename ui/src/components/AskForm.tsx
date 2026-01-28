@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
+import { useSpeechToText } from "@/src/hooks/useSpeechToText";
 export function AskForm({
   onSubmit,
 }: {
@@ -10,7 +10,7 @@ export function AskForm({
   const [question, setQuestion] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [file, setFile] = useState<File | null>(null);
-
+  const speech = useSpeechToText();
   return (
     <form
       className="space-y-4"
@@ -19,15 +19,37 @@ export function AskForm({
         onSubmit(question, courseCode, file);
       }}
     >
-      <textarea
-        className="w-full border rounded p-3"
-        rows={4}
-        placeholder="Ask a course-related question..."
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-        required
-      />
+    <textarea
+    className="w-full border rounded p-3"
+    rows={4}
+    placeholder="Ask a course-related question..."
+    value={speech.transcript || question}
+    onChange={(e) => setQuestion(e.target.value)}
+    required
+    />
+<div className="flex gap-2">
+  <button
+    type="button"
+    onClick={speech.start}
+    className="border px-3 py-1 rounded"
+  >
+    🎙️ Speak
+  </button>
 
+  {speech.listening && (
+    <span className="text-sm text-gray-500">Listening…</span>
+  )}
+
+  {speech.transcript && (
+    <button
+      type="button"
+      onClick={speech.reset}
+      className="text-sm underline"
+    >
+      Clear voice input
+    </button>
+  )}
+</div>
       <input
         className="w-full border rounded p-2"
         placeholder="Course code (optional, e.g. CS5589)"

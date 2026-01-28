@@ -17,7 +17,6 @@ export default function LoginPage() {
     setError(null);
 
     try {
-<<<<<<< HEAD
       const res = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
         body: (() => {
@@ -26,19 +25,6 @@ export default function LoginPage() {
           formData.append("password", password);
           return formData;
         })(),
-=======
-      const body = new URLSearchParams({
-        email,
-        password,
-      });
-
-      const res = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body,
->>>>>>> origin/main
       });
 
       if (!res.ok) {
