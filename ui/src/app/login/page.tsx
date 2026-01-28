@@ -17,17 +17,14 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const body = new URLSearchParams({
-        email,
-        password,
-      });
-
       const res = await fetch("http://localhost:8000/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body,
+        body: (() => {
+          const formData = new FormData();
+          formData.append("email", email);
+          formData.append("password", password);
+          return formData;
+        })(),
       });
 
       if (!res.ok) {
