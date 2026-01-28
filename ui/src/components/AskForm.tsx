@@ -1,24 +1,34 @@
 "use client";
-
+import { useOCR } from "@/src/hooks/useOCR";
 import { useState } from "react";
 import { useSpeechToText } from "@/src/hooks/useSpeechToText";
 export function AskForm({
   onSubmit,
 }: {
-  onSubmit: (q: string, c?: string, f?: File | null) => void;
+  onSubmit: (
+    q: string,
+    c?: string,
+    f?: File | null,
+    extraText?: string
+  ) => void;
 }) {
   const [question, setQuestion] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const speech = useSpeechToText();
+  const ocr = useOCR();
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit(question, courseCode, file);
-      }}
-    >
+        <form
+        onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit(
+            speech.transcript || question,
+            courseCode,
+            file,
+            ocr.text
+            );
+        }}
+        >
     <textarea
     className="w-full border rounded p-3"
     rows={4}
@@ -64,6 +74,32 @@ export function AskForm({
         onChange={(e) => setFile(e.target.files?.[0] || null)}
       />
 
+        <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+            ocr.extract(file);
+            }
+        }}
+        />
+        {ocr.loading && (
+    <p className="text-sm text-gray-500">Extracting text from image…</p>
+    )}
+
+    {ocr.text && (
+    <div className="text-sm border p-2 rounded bg-gray-50">
+        <p className="font-medium">Extracted text (editable):</p>
+        <textarea
+        className="w-full border mt-1 p-2"
+        rows={3}
+        value={ocr.text}
+        onChange={(e) => ocr.reset()}
+        readOnly
+        />
+    </div>
+    )}
       <button
         className="bg-black text-white px-4 py-2 rounded"
         type="submit"
