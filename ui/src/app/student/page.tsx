@@ -16,7 +16,8 @@ export default function StudentPage() {
 async function handleAsk(
   question: string,
   courseCode?: string,
-  file?: File | null
+  file?: File | null,
+  extraText?: string
 ) {
   setLoading(true);
   setAnswer(null);
@@ -30,7 +31,9 @@ async function handleAsk(
   if (courseCode) {
     formData.append("course_code", courseCode);
   }
-
+    if (extraText) {
+    formData.append("extra_context", extraText);
+    }
   if (file) {
     formData.append("file", file);
   }
