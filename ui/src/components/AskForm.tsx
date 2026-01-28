@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -6,17 +5,18 @@ import { useState } from "react";
 export function AskForm({
   onSubmit,
 }: {
-  onSubmit: (q: string, c?: string) => void;
+  onSubmit: (q: string, c?: string, f?: File | null) => void;
 }) {
   const [question, setQuestion] = useState("");
   const [courseCode, setCourseCode] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   return (
     <form
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit(question, courseCode);
+        onSubmit(question, courseCode, file);
       }}
     >
       <textarea
@@ -33,6 +33,13 @@ export function AskForm({
         placeholder="Course code (optional, e.g. CS5589)"
         value={courseCode}
         onChange={(e) => setCourseCode(e.target.value)}
+      />
+
+      <input
+        type="file"
+        accept="application/pdf"
+        className="w-full"
+        onChange={(e) => setFile(e.target.files?.[0] || null)}
       />
 
       <button
