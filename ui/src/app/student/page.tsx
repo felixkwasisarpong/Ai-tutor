@@ -13,32 +13,43 @@ export default function StudentPage() {
   const [citations, setCitations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  async function handleAsk(question: string, courseCode?: string) {
-    setLoading(true);
-    setAnswer(null);
+async function handleAsk(
+  question: string,
+  courseCode?: string,
+  file?: File | null
+) {
+  setLoading(true);
+  setAnswer(null);
 
-    const token = getToken();
-    if (!token) return;
+  const token = getToken();
+  if (!token) return;
 
-    const res = await fetch("http://localhost:8000/ask", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        question,
-        course_code: courseCode || null,
-      }),
-    });
+  const formData = new FormData();
+  formData.append("question", question);
 
-    const data = await res.json();
-
-    setAnswer(data.answer);
-    setConfidence(data.confidence);
-    setCitations(data.citations || []);
-    setLoading(false);
+  if (courseCode) {
+    formData.append("course_code", courseCode);
   }
+
+  if (file) {
+    formData.append("file", file);
+  }
+
+  const res = await fetch("http://localhost:8000/ask", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const data = await res.json();
+
+  setAnswer(data.answer);
+  setConfidence(data.confidence);
+  setCitations(data.citations || []);
+  setLoading(false);
+}
 
   return (
     <main className="max-w-3xl mx-auto p-6 space-y-6">
