@@ -2,10 +2,10 @@
 "use client";
 
 import { useState } from "react";
-import { askQuestion } from "@/lib/api";
-import { AskForm } from "@/components/AskForm";
-import { AnswerCard } from "@/components/AnswerCard";
-import { AskResponse } from "@/lib/types";
+import { askQuestion } from "@/src/lib/api";
+import { AskForm } from "@/src/components/AskForm";
+import { AnswerCard } from "@/src/components/AnswerCard";
+import { AskResponse } from "@/src/lib/types";
 
 export default function StudentPage() {
   const [result, setResult] = useState<AskResponse | null>(null);

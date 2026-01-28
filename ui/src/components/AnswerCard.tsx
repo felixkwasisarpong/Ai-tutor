@@ -1,4 +1,4 @@
-import { AskResponse } from "@/lib/types";
+import { AskResponse } from "@/src/lib/types";
 
 export function AnswerCard({ result }: { result: AskResponse }) {
   return (
