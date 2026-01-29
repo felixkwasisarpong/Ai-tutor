@@ -8,8 +8,15 @@ import {
   listCourseDocuments,
   uploadCourseDocument,
   logout,
+  listAdminLogs,
+  getDocumentStatus,
 } from "@/src/lib/api";
-import type { Course, DocumentRecord } from "@/src/lib/types";
+import type {
+  Course,
+  DocumentRecord,
+  AdminLogEntry,
+  DocumentStatus,
+} from "@/src/lib/types";
 import { useAuthGuard } from "@/src/hooks/useAuthGuard";
 
 type CourseOption = {
@@ -25,10 +32,15 @@ export default function AdminPage() {
   const [courses, setCourses] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [documents, setDocuments] = useState<DocumentRecord[]>([]);
+  const [documentStatus, setDocumentStatus] = useState<
+    Record<string, DocumentStatus>
+  >({});
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [loadingDocs, setLoadingDocs] = useState(false);
+  const [loadingLogs, setLoadingLogs] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [logs, setLogs] = useState<AdminLogEntry[]>([]);
 
   const [deptForm, setDeptForm] = useState({
     code: "",
@@ -79,6 +91,7 @@ export default function AdminPage() {
     try {
       const data = await listCourseDocuments(courseId);
       setDocuments(data);
+      setDocumentStatus({});
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load documents");
     } finally {
@@ -86,8 +99,22 @@ export default function AdminPage() {
     }
   }
 
+  async function refreshLogs() {
+    setLoadingLogs(true);
+    setError(null);
+    try {
+      const data = await listAdminLogs(50);
+      setLogs(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load logs");
+    } finally {
+      setLoadingLogs(false);
+    }
+  }
+
   useEffect(() => {
     refreshCourses();
+    refreshLogs();
   }, []);
 
   useEffect(() => {
@@ -382,6 +409,32 @@ export default function AdminPage() {
                     <div className="text-gray-500">
                       Uploaded by: {doc.uploaded_by}
                     </div>
+                    {documentStatus[doc.id] && (
+                      <div className="text-gray-500">
+                        Chunks indexed:{" "}
+                        {documentStatus[doc.id].chunk_count}
+                      </div>
+                    )}
+                    <button
+                      className="text-xs underline"
+                      onClick={async () => {
+                        try {
+                          const status = await getDocumentStatus(doc.id);
+                          setDocumentStatus((prev) => ({
+                            ...prev,
+                            [doc.id]: status,
+                          }));
+                        } catch (err) {
+                          setError(
+                            err instanceof Error
+                              ? err.message
+                              : "Failed to load document status"
+                          );
+                        }
+                      }}
+                    >
+                      View ingestion status
+                    </button>
                   </div>
                 ))}
               </div>
@@ -391,12 +444,45 @@ export default function AdminPage() {
       </section>
 
       <section className="border rounded p-4 space-y-2">
-        <h2 className="font-semibold">Observability</h2>
-        <p className="text-sm text-gray-600">
-          Ingestion logs, error events, and chunk counts are not exposed yet.
-          Once endpoints are available, this panel will show ingestion status
-          and recent admin actions.
-        </p>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Observability</h2>
+          <button
+            className="text-sm underline"
+            onClick={() => refreshLogs()}
+            disabled={loadingLogs}
+          >
+            {loadingLogs ? "Refreshing…" : "Refresh"}
+          </button>
+        </div>
+        {logs.length === 0 ? (
+          <p className="text-sm text-gray-600">No admin actions yet.</p>
+        ) : (
+          <div className="space-y-2 text-sm">
+            {logs.map((entry, idx) => (
+              <div key={`${entry.type}-${idx}`} className="border rounded p-2">
+                <div className="font-medium">{entry.type}</div>
+                <div className="text-gray-600">
+                  {entry.timestamp} • {entry.request_id || "no request id"}
+                </div>
+                {entry.course_code && (
+                  <div className="text-gray-500">
+                    Course: {entry.course_code}
+                  </div>
+                )}
+                {entry.department_code && (
+                  <div className="text-gray-500">
+                    Department: {entry.department_code}
+                  </div>
+                )}
+                {entry.document_id && (
+                  <div className="text-gray-500">
+                    Document: {entry.document_id}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );

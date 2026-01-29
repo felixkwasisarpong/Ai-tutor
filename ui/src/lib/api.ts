@@ -4,6 +4,8 @@ import type {
   Department,
   Course,
   DocumentRecord,
+  AdminLogEntry,
+  DocumentStatus,
 } from "@/src/lib/types";
 import {
   getRefreshToken,
@@ -286,6 +288,37 @@ export async function listCourseDocuments(
 
   if (!res.ok) {
     throw new Error("Failed to load documents");
+  }
+
+  return res.json();
+}
+
+export async function listAdminLogs(
+  limit = 50
+): Promise<AdminLogEntry[]> {
+  const res = await adminFetch(`/admin/logs?limit=${limit}`, {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to load admin logs");
+  }
+
+  return res.json();
+}
+
+export async function getDocumentStatus(
+  documentId: string
+): Promise<DocumentStatus> {
+  const res = await adminFetch(
+    `/admin/documents/${documentId}/status`,
+    {
+      method: "GET",
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to load document status");
   }
 
   return res.json();
