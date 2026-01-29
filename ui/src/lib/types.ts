@@ -46,3 +46,28 @@ export type DocumentRecord = {
   active: boolean;
   uploaded_by: string;
 };
+
+export type AdminLogEntry = {
+  type: string;
+  timestamp: string;
+  request_id?: string;
+  department_code?: string;
+  department_id?: string;
+  course_code?: string;
+  course_id?: string;
+  document_id?: string;
+  title?: string;
+  document_type?: string;
+  version?: number;
+};
+
+export type DocumentStatus = {
+  document_id: string;
+  course_id: string;
+  title: string;
+  document_type: string;
+  version: number;
+  active: boolean;
+  chunk_count: number;
+  index_size: number;
+};

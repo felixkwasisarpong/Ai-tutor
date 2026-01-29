@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/src/lib/api";
+import { getUserRole } from "@/src/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,7 +19,12 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push("/student");
+      const role = getUserRole();
+      if (role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/student");
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Login failed. Try again."
