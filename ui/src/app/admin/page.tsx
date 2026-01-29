@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createCourse,
   createDepartment,
@@ -69,23 +69,21 @@ export default function AdminPage() {
     return map;
   }, [courses]);
 
-  async function refreshCourses() {
+  const refreshCourses = useCallback(async () => {
     setLoadingCourses(true);
     setError(null);
     try {
       const data = await listCourses();
       setCourses(data);
-      if (!selectedCourse && data.length > 0) {
-        setSelectedCourse(data[0].code);
-      }
+      setSelectedCourse((current) => current || data[0]?.code || "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load courses");
     } finally {
       setLoadingCourses(false);
     }
-  }
+  }, []);
 
-  async function refreshDocuments(courseId: string) {
+  const refreshDocuments = useCallback(async (courseId: string) => {
     setLoadingDocs(true);
     setError(null);
     try {
@@ -97,9 +95,9 @@ export default function AdminPage() {
     } finally {
       setLoadingDocs(false);
     }
-  }
+  }, []);
 
-  async function refreshLogs() {
+  const refreshLogs = useCallback(async () => {
     setLoadingLogs(true);
     setError(null);
     try {
@@ -110,18 +108,18 @@ export default function AdminPage() {
     } finally {
       setLoadingLogs(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     refreshCourses();
     refreshLogs();
-  }, []);
+  }, [refreshCourses, refreshLogs]);
 
   useEffect(() => {
     if (selectedCourse) {
       refreshDocuments(selectedCourse);
     }
-  }, [selectedCourse]);
+  }, [refreshDocuments, selectedCourse]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50">
