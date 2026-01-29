@@ -1,10 +1,10 @@
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from app.db.base import Base
 from alembic import context
-import os
+from app.db.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,11 +25,6 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
-import os
-from alembic import context
-
-config = context.config
 
 def get_database_url() -> str:
     # 1️⃣ Prefer environment variable (Docker, CI, prod)
@@ -58,10 +53,7 @@ def run_migrations_offline() -> None:
 
     """
 
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        raise RuntimeError("DATABASE_URL is not set")
-
+    db_url = get_database_url()
     config.set_main_option("sqlalchemy.url", db_url)
 
 
@@ -78,10 +70,7 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online():
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        raise RuntimeError("DATABASE_URL is not set")
-
+    db_url = get_database_url()
     config.set_main_option("sqlalchemy.url", db_url)
 
     connectable = engine_from_config(

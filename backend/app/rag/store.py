@@ -88,6 +88,13 @@ class VectorStore:
                 filtered.append(item)
 
         return filtered[:k]
+
+    def count_by_document_id(self, document_id: str) -> int:
+        return sum(
+            1
+            for meta in self.metadatas
+            if meta.get("document_id") == document_id
+        )
     
     def _persist(self):
         print(f"Persisting FAISS index to {INDEX_PATH}")

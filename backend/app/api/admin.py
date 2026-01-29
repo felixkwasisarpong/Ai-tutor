@@ -21,10 +21,13 @@ from app.service.admin import (create_department_service,
 from app.db.models.course import Course
 from app.core.logging import logger
 from app.rag.ingest import chunk_text, load_pdf, make_chunks
+from collections import deque
+from datetime import datetime
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
 UPLOAD_DIR = "data/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+ADMIN_EVENTS = deque(maxlen=200)
 
 
 @router.post("/departments")
@@ -42,6 +45,13 @@ def create_department(
     },
 )
     department = create_department_service(db, payload)
+    ADMIN_EVENTS.appendleft({
+        "type": "department_created",
+        "timestamp": datetime.utcnow().isoformat(),
+        "request_id": request.state.request_id,
+        "department_code": department.code,
+        "department_id": str(department.id),
+    })
     return {
         "id": department.id,
         "code": department.code,
@@ -66,6 +76,14 @@ def create_course(
     },
 )
     course = create_course_service(db, payload)
+    ADMIN_EVENTS.appendleft({
+        "type": "course_created",
+        "timestamp": datetime.utcnow().isoformat(),
+        "request_id": request.state.request_id,
+        "course_code": course.code,
+        "course_id": str(course.id),
+        "department_code": payload.department_code,
+    })
     return {
         "id": course.id,
         "code": course.code,
@@ -141,6 +159,17 @@ async def upload_course_document(
 
     vector_store.add(chunks)
 
+    ADMIN_EVENTS.appendleft({
+        "type": "document_uploaded",
+        "timestamp": datetime.utcnow().isoformat(),
+        "request_id": request.state.request_id,
+        "course_code": course.code,
+        "document_id": str(document.id),
+        "title": title,
+        "document_type": document_type,
+        "version": version,
+    })
+
     return {
         "document_id": document.id,
         "version": version,
@@ -202,3 +231,34 @@ def get_courses(db: Session = Depends(get_db)):
         }
         for c in courses
     ]
+
+@router.get("/logs")
+def list_admin_logs(limit: int = 50):
+    items = list(ADMIN_EVENTS)[: max(1, min(limit, 200))]
+    return items
+
+@router.get("/documents/{document_id}/status")
+def get_document_status(
+    document_id: str,
+    db: Session = Depends(get_db),
+):
+    try:
+        doc_uuid = UUID(document_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid document ID")
+
+    document = db.get(Document, doc_uuid)
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    chunk_count = vector_store.count_by_document_id(document_id)
+    return {
+        "document_id": document_id,
+        "course_id": str(document.course_id),
+        "title": document.title,
+        "document_type": document.document_type,
+        "version": document.version,
+        "active": document.active,
+        "chunk_count": chunk_count,
+        "index_size": vector_store.index.ntotal,
+    }
