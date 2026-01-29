@@ -4,10 +4,13 @@ node_modules/
 key
 data
 # Terraform
-**/.terraform/
+.terraform/
 *.tfstate
 *.tfstate.*
-*.tfvars
+.crash.log
+
+# Terraform lock
+.terraform.lock.hcl
 
 # Python
 __pycache__/
