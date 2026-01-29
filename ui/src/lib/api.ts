@@ -112,13 +112,33 @@ export async function askQuestion(params: {
     formData.append("extra_context", params.supplementalText);
   }
 
-  const res = await fetch(`${API_BASE_URL}/ask`, {
+  let res = await fetch(`${API_BASE_URL}/ask`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
     },
     body: formData,
   });
+
+  if (res.status === 401) {
+    try {
+      await refreshAccessToken();
+      const refreshedToken = getToken();
+      if (!refreshedToken) {
+        throw new Error("Missing access token");
+      }
+      res = await fetch(`${API_BASE_URL}/ask`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${refreshedToken}`,
+        },
+        body: formData,
+      });
+    } catch {
+      clearToken();
+      throw new Error("Session expired. Please log in again.");
+    }
+  }
 
   if (!res.ok) {
     throw new Error("Failed to get answer");

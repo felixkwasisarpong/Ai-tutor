@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AskForm } from "@/src/components/AskForm";
 import { useAuthGuard } from "@/src/hooks/useAuthGuard";
-import { askQuestion } from "@/src/lib/api";
+import { askQuestion, logout } from "@/src/lib/api";
 import type { AskResponse } from "@/src/lib/types";
 
 export default function StudentPage() {
@@ -50,7 +50,26 @@ export default function StudentPage() {
 
   return (
     <main className="max-w-3xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Ask Canon</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Ask Canon</h1>
+        <button
+          className="text-sm underline"
+          onClick={async () => {
+            try {
+              await logout();
+              window.location.href = "/login";
+            } catch (err) {
+              setError(
+                err instanceof Error
+                  ? err.message
+                  : "Unable to log out."
+              );
+            }
+          }}
+        >
+          Logout
+        </button>
+      </div>
 
       <AskForm onSubmit={handleAsk} />
 
