@@ -27,7 +27,7 @@ type CourseOption = {
 };
 
 export default function AdminPage() {
-  useAuthGuard();
+  useAuthGuard("admin");
 
   const [courses, setCourses] = useState<CourseOption[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
