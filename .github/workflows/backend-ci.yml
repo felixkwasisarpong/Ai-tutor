@@ -35,6 +35,15 @@ jobs:
       OLLAMA_BASE_URL: http://localhost:11434  # mocked, not used
 
     steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo apt-get clean
+          docker system prune -af
+
+
       - name: Checkout code
         uses: actions/checkout@v4
 
