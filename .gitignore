@@ -1,3 +1,6 @@
+node_modules/
+**/node_modules/
+
 key
 data
 # Terraform
@@ -18,3 +21,4 @@ alembic/__pycache__/
 .env
 
 .DS_Store
+
