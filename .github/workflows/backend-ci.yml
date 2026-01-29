@@ -17,25 +17,25 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
+          POSTGRES_USER: ai_tutor
+          POSTGRES_PASSWORD: ai_tutor
+          POSTGRES_DB: ai_tutor
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U test"
+          --health-cmd="pg_isready -U ai_tutor"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
 
     env:
-      DATABASE_URL: postgresql+psycopg2://test:test@localhost:5432/test
+      DATABASE_URL: postgresql+psycopg2://ai_tutor:ai_tutor@localhost:5432/ai_tutor
       ADMIN_API_KEY: test-admin-key
       JWT_SECRET: test-secret
       OLLAMA_BASE_URL: http://localhost:11434
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -43,28 +43,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install system dependencies
+      - name: Install dependencies
+        working-directory: backend
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc libpq-dev
-
-      - name: Install backend dependencies
-        run: |
-          cd backend
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run lint (ruff)
+      - name: Run migrations
+        working-directory: backend
         run: |
-          cd backend
-          ruff check app || echo "Lint warnings (non-blocking for now)"
+          alembic upgrade head
 
       - name: Run tests
+        working-directory: backend
         run: |
-          cd backend
-          pytest || echo "No tests yet (allowed)"
-
-      - name: Docker build (backend)
-        run: |
-          cd backend
-          docker build -t canon-backend-ci .
+          pytest -q
