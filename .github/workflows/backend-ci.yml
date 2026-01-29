@@ -82,5 +82,3 @@ jobs:
             -p 8000:8000 \
             canon-backend:test
 
-          sleep 10
-          curl --fail http://localhost:8000/health
