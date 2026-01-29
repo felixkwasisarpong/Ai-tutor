@@ -1,4 +1,10 @@
-import type { AskResponse, LoginResponse } from "@/src/lib/types";
+import type {
+  AskResponse,
+  LoginResponse,
+  Department,
+  Course,
+  DocumentRecord,
+} from "@/src/lib/types";
 import {
   getRefreshToken,
   getToken,
@@ -83,7 +89,16 @@ export async function logout(): Promise<void> {
   });
 
   if (!res.ok) {
-    throw new Error("Failed to log out");
+    let message = "Failed to log out";
+    try {
+      const data = await res.json();
+      if (data?.detail) {
+        message = data.detail;
+      }
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(message);
   }
 
   clearToken();
@@ -142,6 +157,135 @@ export async function askQuestion(params: {
 
   if (!res.ok) {
     throw new Error("Failed to get answer");
+  }
+
+  return res.json();
+}
+
+async function adminFetch(
+  path: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const token = getToken();
+  if (!token) {
+    throw new Error("Missing access token");
+  }
+
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status === 401) {
+    await refreshAccessToken();
+    const refreshedToken = getToken();
+    if (!refreshedToken) {
+      throw new Error("Missing access token");
+    }
+    return fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${refreshedToken}`,
+      },
+    });
+  }
+
+  return res;
+}
+
+export async function createDepartment(
+  payload: Department
+): Promise<Department> {
+  const res = await adminFetch("/admin/departments", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to create department");
+  }
+
+  return res.json();
+}
+
+export async function createCourse(payload: {
+  code: string;
+  name: string;
+  department_code: string;
+}): Promise<Course> {
+  const res = await adminFetch("/admin/courses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to create course");
+  }
+
+  return res.json();
+}
+
+export async function listCourses(): Promise<Course[]> {
+  const res = await adminFetch("/admin/courses", {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to load courses");
+  }
+
+  return res.json();
+}
+
+export async function uploadCourseDocument(params: {
+  courseId: string;
+  title: string;
+  documentType?: string;
+  file: File;
+}): Promise<{
+  document_id: string;
+  version: number;
+  status: string;
+}> {
+  const formData = new FormData();
+  formData.append("title", params.title);
+  formData.append("document_type", params.documentType || "lecture");
+  formData.append("file", params.file);
+
+  const res = await adminFetch(
+    `/admin/courses/${params.courseId}/documents`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to upload document");
+  }
+
+  return res.json();
+}
+
+export async function listCourseDocuments(
+  courseId: string
+): Promise<DocumentRecord[]> {
+  const res = await adminFetch(`/admin/courses/${courseId}/documents`, {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to load documents");
   }
 
   return res.json();
