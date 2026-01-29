@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { setToken } from "@/src/lib/auth";
+import { login } from "@/src/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,28 +17,7 @@ export default function LoginPage() {
     setError(null);
 
     try {
-
-      const res = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        body: (() => {
-          const formData = new FormData();
-          formData.append("email", email);
-          formData.append("password", password);
-          return formData;
-        })(),
-
-      });
-
-      if (!res.ok) {
-        throw new Error("Invalid credentials");
-      }
-
-      const data = await res.json();
-      if (!data?.access_token) {
-        throw new Error("Missing access token");
-      }
-
-      setToken(data.access_token);
+      await login(email, password);
       router.push("/student");
     } catch (err) {
       setError(
