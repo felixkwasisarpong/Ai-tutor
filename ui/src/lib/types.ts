@@ -22,3 +22,27 @@ export type LoginResponse = {
   access_token: string;
   refresh_token?: string;
 };
+
+export type Department = {
+  id?: string;
+  code: string;
+  name: string;
+  faculty: string;
+};
+
+export type Course = {
+  id?: string;
+  code: string;
+  name: string;
+  department: string;
+  department_id?: string;
+};
+
+export type DocumentRecord = {
+  id: string;
+  title: string;
+  document_type: string;
+  version: number;
+  active: boolean;
+  uploaded_by: string;
+};
