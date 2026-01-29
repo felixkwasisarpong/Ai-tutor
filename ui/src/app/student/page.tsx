@@ -7,7 +7,7 @@ import { askQuestion, logout } from "@/src/lib/api";
 import type { AskResponse } from "@/src/lib/types";
 
 export default function StudentPage() {
-  useAuthGuard();
+  useAuthGuard("student");
 
   const [result, setResult] = useState<AskResponse | null>(null);
   const [loading, setLoading] = useState(false);
