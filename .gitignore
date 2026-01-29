@@ -16,3 +16,5 @@ alembic/__pycache__/
 
 # Local env
 .env
+
+.DS_Store

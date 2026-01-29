@@ -112,6 +112,8 @@ def ask_question(
     else:
         result = agent.invoke({
             "question": normalized["question"],
+            "extra_context": normalized["context_text"],
+            "modality": normalized["modality"],
             "force_rag": False,
             "request_id": request_id,
         })
@@ -120,7 +122,7 @@ def ask_question(
         "answer": result["answer"],
         "source": result["source"],
         "citations": result.get("citations", []),
-        "confidence": result.get("confidence", "none"),
+        "confidence": result.get("confidence") or "none",
         "follow_up": result.get("follow_up"),
     }
 

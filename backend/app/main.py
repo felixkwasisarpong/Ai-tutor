@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 import uuid
 
 from app.rag.store import vector_store
@@ -15,6 +16,15 @@ from app.core.logging import setup_logging
 
 app = FastAPI(title=settings.app_name)
 app.add_middleware(RequestIdMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+     allow_origins=[
+        "http://localhost:3000",  # Next.js dev
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 setup_logging()
 
 
