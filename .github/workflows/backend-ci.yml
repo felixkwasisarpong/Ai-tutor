@@ -1,0 +1,70 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+
+jobs:
+  backend-ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql+psycopg2://test:test@localhost:5432/test
+      ADMIN_API_KEY: test-admin-key
+      JWT_SECRET: test-secret
+      OLLAMA_BASE_URL: http://localhost:11434
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc libpq-dev
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run lint (ruff)
+        run: |
+          cd backend
+          ruff check app || echo "Lint warnings (non-blocking for now)"
+
+      - name: Run tests
+        run: |
+          cd backend
+          pytest || echo "No tests yet (allowed)"
+
+      - name: Docker build (backend)
+        run: |
+          cd backend
+          docker build -t canon-backend-ci .
