@@ -17,6 +17,7 @@ export function AskForm({
   const [file, setFile] = useState<File | null>(null);
   const speech = useSpeechToText();
   const ocr = useOCR();
+  const [ocrEditedText, setOcrEditedText] = useState("");
   return (
         <form
         onSubmit={(e) => {
@@ -25,7 +26,7 @@ export function AskForm({
             speech.transcript || question,
             courseCode,
             file,
-            ocr.text
+            ocrEditedText || ocr.text
             );
         }}
         >
@@ -69,37 +70,37 @@ export function AskForm({
 
       <input
         type="file"
-        accept="application/pdf"
+        accept="application/pdf,image/*,audio/*"
         className="w-full"
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        onChange={(e) => {
+          const selected = e.target.files?.[0] || null;
+          setFile(selected);
+          if (selected?.type?.startsWith("image/")) {
+            ocr.extract(selected).then(() => {
+              setOcrEditedText(ocr.text);
+            });
+          }
+        }}
       />
 
-        <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-            ocr.extract(file);
-            }
-        }}
-        />
-        {ocr.loading && (
-    <p className="text-sm text-gray-500">Extracting text from image…</p>
-    )}
+      {ocr.loading && (
+        <p className="text-sm text-gray-500">Extracting text from image…</p>
+      )}
 
-    {ocr.text && (
-    <div className="text-sm border p-2 rounded bg-gray-50">
-        <p className="font-medium">Extracted text (editable):</p>
-        <textarea
-        className="w-full border mt-1 p-2"
-        rows={3}
-        value={ocr.text}
-        onChange={(e) => ocr.reset()}
-        readOnly
-        />
-    </div>
-    )}
+      {ocr.text && (
+        <div className="text-sm border p-2 rounded bg-gray-50">
+          <p className="font-medium">Extracted text (editable):</p>
+          <textarea
+            className="w-full border mt-1 p-2"
+            rows={3}
+            value={ocrEditedText || ocr.text}
+            onChange={(e) => {
+              setOcrEditedText(e.target.value);
+              ocr.setText(e.target.value);
+            }}
+          />
+        </div>
+      )}
       <button
         className="bg-black text-white px-4 py-2 rounded"
         type="submit"
