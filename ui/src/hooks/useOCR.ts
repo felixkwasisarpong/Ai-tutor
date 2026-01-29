@@ -20,6 +20,7 @@ export function useOCR() {
 
   return {
     text,
+    setText,
     loading,
     extract,
     reset,
