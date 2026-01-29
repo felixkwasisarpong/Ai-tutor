@@ -2,57 +2,43 @@
 
 import { useState } from "react";
 import { AskForm } from "@/src/components/AskForm";
-import { getToken } from "@/src/lib/auth";
 import { useAuthGuard } from "@/src/hooks/useAuthGuard";
+import { askQuestion } from "@/src/lib/api";
+import type { AskResponse } from "@/src/lib/types";
 
 export default function StudentPage() {
   useAuthGuard();
 
-  const [answer, setAnswer] = useState<string | null>(null);
-  const [confidence, setConfidence] = useState<string | null>(null);
-  const [citations, setCitations] = useState<any[]>([]);
+  const [result, setResult] = useState<AskResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-async function handleAsk(
-  question: string,
-  courseCode?: string,
-  file?: File | null,
-  extraText?: string
-) {
-  setLoading(true);
-  setAnswer(null);
+  async function handleAsk(
+    question: string,
+    courseCode?: string,
+    file?: File | null,
+    extraText?: string
+  ) {
+    setLoading(true);
+    setError(null);
+    setResult(null);
 
-  const token = getToken();
-  if (!token) return;
-
-  const formData = new FormData();
-  formData.append("question", question);
-
-  if (courseCode) {
-    formData.append("course_code", courseCode);
-  }
-    if (extraText) {
-    formData.append("extra_context", extraText);
+    try {
+      const data = await askQuestion({
+        question,
+        courseCode,
+        file,
+        supplementalText: extraText,
+      });
+      setResult(data);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Unable to get an answer."
+      );
+    } finally {
+      setLoading(false);
     }
-  if (file) {
-    formData.append("file", file);
   }
-
-  const res = await fetch("http://localhost:8000/ask", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
-
-  const data = await res.json();
-
-  setAnswer(data.answer);
-  setConfidence(data.confidence);
-  setCitations(data.citations || []);
-  setLoading(false);
-}
 
   return (
     <main className="max-w-3xl mx-auto p-6 space-y-6">
@@ -61,22 +47,23 @@ async function handleAsk(
       <AskForm onSubmit={handleAsk} />
 
       {loading && <p className="text-gray-500">Thinking…</p>}
+      {error && <p className="text-red-600">{error}</p>}
 
-      {answer && (
+      {result && (
         <div className="border rounded p-4 space-y-3">
-          <p>{answer}</p>
+          <p>{result.answer}</p>
 
-          {confidence && (
+          {result.confidence && (
             <p className="text-sm text-gray-500">
-              Confidence: <strong>{confidence}</strong>
+              Confidence: <strong>{result.confidence}</strong>
             </p>
           )}
 
-          {citations.length > 0 && (
+          {result.citations.length > 0 && (
             <div className="text-sm">
               <p className="font-medium">Citations</p>
               <ul className="list-disc pl-5">
-                {citations.map((c, i) => (
+                {result.citations.map((c, i) => (
                   <li key={i}>
                     {c.document} (chunk {c.chunk})
                   </li>
