@@ -30,6 +30,8 @@ jobs:
         run: npm ci
 
       - name: Build UI
+        env:
+            NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
         run: npm run build
 
       - name: Configure AWS credentials
