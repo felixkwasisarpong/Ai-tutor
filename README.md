@@ -1,8 +1,8 @@
-<file name=0 path=/Users/Apple/Documents/Personal Projects/Ai Tutor/README.md># 🎓 Canon — Agentic RAG Academic Correctness & Citation-First AI Platform
+# 🎓 Canon — Agentic RAG Academic Correctness & Citation-First AI Platform
 
 ![Canon Banner](docs/banner.png)
 
-> **A production-grade, agentic, course-aware AI academic platform for university-level sciences — combining Retrieval-Augmented Generation (RAG), LangGraph-based decision logic, structured academic data models, and local LLM inference.**
+> **A production-grade, agentic, course-aware AI academic platform for university-level sciences — combining Retrieval-Augmented Generation (RAG), LangGraph-based decision logic, structured academic data models, and local LLM inference. Now fully deployed on AWS infrastructure for scalable, secure, and reliable academic assistance.**
 
 ---
 
@@ -14,7 +14,8 @@
 ![Postgres](https://img.shields.io/badge/Postgres-Relational_DB-blue)
 ![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
-![Status](https://img.shields.io/badge/status-active_development-success)
+![AWS](https://img.shields.io/badge/AWS-Cloud_Deployment-yellowgreen)
+![Status](https://img.shields.io/badge/status-production_success-brightgreen)
 
 ---
 
@@ -48,6 +49,33 @@ It combines:
 - **Local LLM inference** (no external APIs)
 
 The result is **accurate, explainable, auditable, and citation-aware AI academic assistance**.
+
+---
+
+## 🚀 Deployment Status (Production)
+
+Canon is fully deployed and production-ready, leveraging AWS cloud infrastructure to ensure scalability, security, and high availability:
+
+- Backend hosted on **AWS ECS Fargate**, running containerized FastAPI services behind an **Application Load Balancer (ALB)**
+- **PostgreSQL database managed on AWS RDS** for reliable and scalable data storage
+- Sensitive configuration and credentials managed securely via **AWS Secrets Manager**
+- Frontend UI hosted on **AWS S3** with global distribution through **CloudFront CDN**
+- Continuous Integration and Deployment (CI/CD) pipelines implemented via **GitHub Actions** for automated testing and deployment
+
+---
+
+## 🔧 Infrastructure
+
+The entire cloud infrastructure for Canon is managed through **Terraform**, enabling consistent, version-controlled provisioning of:
+
+- ECS Fargate clusters and services
+- ALB and target groups
+- RDS PostgreSQL instances with automated backups
+- S3 buckets and CloudFront distributions for frontend hosting
+- IAM roles and policies for secure resource access
+- Secrets Manager secrets for sensitive data management
+
+This infrastructure-as-code approach ensures reproducibility, auditability, and ease of maintenance.
 
 ---
 
@@ -152,23 +180,23 @@ FAISS + PDFs   Ollama (Local)
 
 ## 🔄 How It Works
 
-1. A student submits a question
-2. The agent evaluates intent and routing rules
-3. Course references **force RAG**
-4. Documents are filtered by course metadata
-5. Confidence is computed deterministically and follow-up eligibility is evaluated
-6. The LLM generates a grounded response
-7. Citations are returned with the answer
+1. A student submits a question  
+2. The agent evaluates intent and routing rules  
+3. Course references **force RAG**  
+4. Documents are filtered by course metadata  
+5. Confidence is computed deterministically and follow-up eligibility is evaluated  
+6. The LLM generates a grounded response  
+7. Citations are returned with the answer  
 
 ---
 
 ## 🗃️ Database Schema (Core)
 
-- **departments**
-- **courses**
-  - FK → departments
-- **documents**
-  - FK → courses
+- **departments**  
+- **courses**  
+  - FK → departments  
+- **documents**  
+  - FK → courses  
 
 All schema changes are managed via **Alembic migrations**  
 No automatic data seeding in production.
@@ -197,9 +225,9 @@ X-Admin-Key: <ADMIN_API_KEY>
 
 Canon uses JWT-based authentication with distinct roles for students and admins. Access tokens are issued as JWTs, enabling stateless and secure API access. Refresh tokens support session renewal and token revocation to maintain security.
 
-- **JWT Access Tokens:** Short-lived tokens granting access to protected endpoints.
-- **Refresh Tokens:** Used to obtain new access tokens without re-authentication; revocable for security.
-- **Roles:** Student and Admin roles are enforced to separate permissions; admins manage data ingestion and configuration, while students access question answering features.
+- **JWT Access Tokens:** Short-lived tokens granting access to protected endpoints.  
+- **Refresh Tokens:** Used to obtain new access tokens without re-authentication; revocable for security.  
+- **Roles:** Student and Admin roles are enforced to separate permissions; admins manage data ingestion and configuration, while students access question answering features.  
 - **API Protection:** Admin endpoints require valid JWTs with admin role claims; student endpoints require student role tokens. This ensures strict access control and auditability.
 
 ---
@@ -208,69 +236,74 @@ Canon uses JWT-based authentication with distinct roles for students and admins.
 
 Canon provides dedicated web UIs for both students and admins, built with Next.js and tightly integrated with the backend via a well-defined API contract.
 
-- **Student UI:**
-  - Login and authentication flows
-  - Submit academic questions with course context
-  - View answers with citations and confidence levels
-  - Engage in policy-gated follow-ups
-  - Support for multi-modal inputs including PDFs and images with OCR
+- **Student UI:**  
+  - Login and authentication flows  
+  - Submit academic questions with course context  
+  - View answers with citations and confidence levels  
+  - Engage in policy-gated follow-ups  
+  - Support for multi-modal inputs including PDFs and images with OCR  
 
-- **Admin UI:**
-  - Manage departments, courses, and course documents
-  - Upload and version academic PDFs
-  - Monitor ingestion and data status
-  - Role-based access control with audit trails
+- **Admin UI:**  
+  - Manage departments, courses, and course documents  
+  - Upload and version academic PDFs  
+  - Monitor ingestion and data status  
+  - Role-based access control with audit trails  
 
 The UI communicates through a stable, versioned API ensuring smooth interaction and future extensibility.
 
 ---
 
-## 🛣️ Roadmap (as of Phase 6B — Product & AI Capabilities)
+## 🛣️ Roadmap (Updated)
 
 ### ✅ Completed
-- Agentic routing (LangGraph)
-- Course-aware RAG
-- Persistent vector store
-- Admin auth guard
-- PostgreSQL-backed university schema
-- Citation-aware responses
-- Local LLM inference (Ollama)
-- Confidence-gated answers (high / medium / low / none)
-- Policy-gated follow-up questions
-- Bounded conversation memory (TTL-based)
-- Multi-modal input normalization (text + PDF)
-- Observability (request IDs, structured logging)
-- JWT-based authentication (student + admin roles)
-- Refresh tokens & token revocation
-- Student UI (Next.js): login, ask question, citations, confidence, follow-ups
-- Admin UI: department/course/document management
-- UI CI (lint + build)
-- Follow-up question UX
-- Multi-modal input scaffolding (PDF, image OCR)
-- Live audio input (speech-to-text)
-- OCR backend integration finalization
+- Agentic routing (LangGraph)  
+- Course-aware RAG  
+- Persistent vector store  
+- Admin auth guard  
+- PostgreSQL-backed university schema  
+- Citation-aware responses  
+- Local LLM inference (Ollama)  
+- Confidence-gated answers (high / medium / low / none)  
+- Policy-gated follow-up questions  
+- Bounded conversation memory (TTL-based)  
+- Multi-modal input normalization (text + PDF)  
+- Observability (request IDs, structured logging)  
+- JWT-based authentication (student + admin roles)  
+- Refresh tokens & token revocation  
+- Student UI (Next.js): login, ask question, citations, confidence, follow-ups  
+- Admin UI: department/course/document management  
+- UI CI (lint + build)  
+- Follow-up question UX  
+- Multi-modal input scaffolding (PDF, image OCR)  
+- Live audio input (speech-to-text)  
+- OCR backend integration finalization  
+- **AWS deployment: Terraform + ECS + ALB + RDS**  
+- **CloudFront + S3 UI hosting**  
+- **Cost controls & budgets**
 
-### 🔜 Planned
-- AWS deployment (Terraform + ECS + ALB + RDS)
-- CloudFront + S3 UI hosting
-- Cost controls & budgets
-- Optional GPU inference path
 
 ---
 
-## 🎯 Design Philosophy
+## 🧪 Operational Guarantees
 
-Canon is built around a single principle:
-**Academic correctness beats conversational fluency.**
+Canon enforces strict operational guarantees to maintain academic integrity and reliability:
 
-Every system boundary — routing, retrieval, memory, and generation —
-is designed to make uncertainty explicit and hallucinations impossible by default.
+- No hallucinations without explicit citations to course materials  
+- Refusal policy for insufficient or out-of-scope content  
+- Bounded conversation memory preventing drift and misinformation  
+- Transparent confidence scoring and policy-driven follow-ups  
+
+---
+
+## 📌 Status
+
+**Production-deployed, actively maintained.**
 
 ---
 
 ## 🤝 Support
 
-If you find this project useful:
-- ⭐ Star the repository
-- 🧠 Use it in your course
-- 🚀 Extend it to new subjects</file>
+If you find this project useful:  
+- ⭐ Star the repository  
+- 🧠 Use it in your course  
+- 🚀 Extend it to new subjects
