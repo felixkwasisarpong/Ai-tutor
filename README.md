@@ -1,4 +1,4 @@
-# 🎓 Canon — Agentic RAG Academic Correctness & Citation-First AI Platform
+<file name=0 path=/Users/Apple/Documents/Personal Projects/Ai Tutor/README.md># 🎓 Canon — Agentic RAG Academic Correctness & Citation-First AI Platform
 
 ![Canon Banner](docs/banner.png)
 
@@ -193,94 +193,39 @@ X-Admin-Key: <ADMIN_API_KEY>
 
 ---
 
-## 📁 Project Structure
+## 🔑 Authentication & Roles
 
-```text
-backend/
-├── app/
-│   ├── api/            # FastAPI routes (admin + public)
-│   ├── agent/          # LangGraph agent logic
-│   ├── llm/            # Ollama client & generation
-│   ├── rag/            # Ingestion, retrieval, vector store
-│   ├── db/             # SQLAlchemy models & sessions
-│   ├── services/       # Business logic
-│   └── core/           # Config & auth
-├── data/               # Uploaded PDFs
-├── rag_store/          # Persistent FAISS index
-├── alembic/            # DB migrations
-├── docker-compose.yml
-└── Dockerfile
-```
+Canon uses JWT-based authentication with distinct roles for students and admins. Access tokens are issued as JWTs, enabling stateless and secure API access. Refresh tokens support session renewal and token revocation to maintain security.
+
+- **JWT Access Tokens:** Short-lived tokens granting access to protected endpoints.
+- **Refresh Tokens:** Used to obtain new access tokens without re-authentication; revocable for security.
+- **Roles:** Student and Admin roles are enforced to separate permissions; admins manage data ingestion and configuration, while students access question answering features.
+- **API Protection:** Admin endpoints require valid JWTs with admin role claims; student endpoints require student role tokens. This ensures strict access control and auditability.
 
 ---
 
-## 🧪 Local Development
+## 🖥️ User Interfaces
 
-### Prerequisites
-- Docker
-- Docker Compose
-- ~8GB RAM recommended for local LLM inference
+Canon provides dedicated web UIs for both students and admins, built with Next.js and tightly integrated with the backend via a well-defined API contract.
 
-### Run locally
+- **Student UI:**
+  - Login and authentication flows
+  - Submit academic questions with course context
+  - View answers with citations and confidence levels
+  - Engage in policy-gated follow-ups
+  - Support for multi-modal inputs including PDFs and images with OCR
 
-```bash
-docker compose up --build
-```
+- **Admin UI:**
+  - Manage departments, courses, and course documents
+  - Upload and version academic PDFs
+  - Monitor ingestion and data status
+  - Role-based access control with audit trails
 
-### Pull LLM model (inside container)
-
-```bash
-docker compose exec ollama ollama pull llama3
-```
-
----
-
-## 📖 Example API Usage
-
-### Ask a question
-
-```http
-POST /ask
-```
-
-```json
-{
-  "question": "Explain entropy as used in this course",
-  "course_code": "CS5589"
-}
-```
-
-### Response (example)
-
-```json
-{
-  "answer": "...",
-  "source": "rag:CS5589",
-  "citations": [
-    {
-      "document": "Lecture 3 – Entropy",
-      "chunk": 14
-    }
-  ]
-}
-```
+The UI communicates through a stable, versioned API ensuring smooth interaction and future extensibility.
 
 ---
 
-
-## 🛡️ Platform Hardening (Phase 5)
-
-Canon has completed a full platform-hardening phase focused on production readiness and academic integrity.
-
-This phase includes:
-- **Observability**: request IDs, structured logging, health and readiness checks, and admin audit logs
-- **Inference robustness**: agentic routing, confidence-gated RAG, and explicit refusal policies
-- **Security boundaries**: admin-only authentication for academic data control
-- **UX planning**: finalized student and admin interaction flows with stable API contracts
-
-Phase 5 intentionally prioritizes correctness, traceability, and operational safety over feature velocity.
-
-## 🛣️ Roadmap
+## 🛣️ Roadmap (as of Phase 6B — Product & AI Capabilities)
 
 ### ✅ Completed
 - Agentic routing (LangGraph)
@@ -295,13 +240,21 @@ Phase 5 intentionally prioritizes correctness, traceability, and operational saf
 - Bounded conversation memory (TTL-based)
 - Multi-modal input normalization (text + PDF)
 - Observability (request IDs, structured logging)
+- JWT-based authentication (student + admin roles)
+- Refresh tokens & token revocation
+- Student UI (Next.js): login, ask question, citations, confidence, follow-ups
+- Admin UI: department/course/document management
+- UI CI (lint + build)
+- Follow-up question UX
+- Multi-modal input scaffolding (PDF, image OCR)
+- Live audio input (speech-to-text)
+- OCR backend integration finalization
 
 ### 🔜 Planned
-- Audio input (live speech-to-text)
-- Image input (OCR for handwritten / diagram-based questions)
-- Student UI (citation viewer, confidence indicators)
-- Admin UI (course & document management)
-- AWS deployment (Terraform + ECS)
+- AWS deployment (Terraform + ECS + ALB + RDS)
+- CloudFront + S3 UI hosting
+- Cost controls & budgets
+- Optional GPU inference path
 
 ---
 
@@ -320,4 +273,4 @@ is designed to make uncertainty explicit and hallucinations impossible by defaul
 If you find this project useful:
 - ⭐ Star the repository
 - 🧠 Use it in your course
-- 🚀 Extend it to new subjects
+- 🚀 Extend it to new subjects</file>
