@@ -1,5 +1,7 @@
 name: Backend CI
-
+permissions:
+  contents: read
+  packages: write
 on:
   push:
     paths:
